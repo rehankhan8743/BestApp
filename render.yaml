@@ -1,11 +1,11 @@
 services:
-  # Backend Service
+  # Full Stack Service
   - type: web
-    name: bestapp-backend
+    name: bestapp
     env: node
     region: oregon
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npm run build
     startCommand: node server.js
     envVars:
       - key: NODE_ENV
@@ -13,16 +13,4 @@ services:
       - key: PORT
         value: 5000
       - key: MONGODB_URI
-        sync: false
-
-  # Frontend Service (Static Site)
-  - type: web
-    name: bestapp-frontend
-    env: static
-    region: oregon
-    plan: free
-    buildCommand: cd client && npm install && npm run build
-    staticPublishPath: ./client/dist
-    envVars:
-      - key: VITE_API_URL
         sync: false
