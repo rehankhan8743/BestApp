@@ -22,73 +22,76 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => console.log('❌ MongoDB Connection Error:', err.message));
 
-// Schema & Model
-const itemSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+// Schema & Model for App Posts
+const postSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  fileLink: { type: String, required: true },
   description: String,
   createdAt: { type: Date, default: Date.now }
 });
 
-const Item = mongoose.model('Item', itemSchema);
+const Post = mongoose.model('Post', postSchema);
 
 // API Routes
 
-// GET all items
-app.get('/api/items', async (req, res) => {
+// GET all posts
+app.get('/api/posts', async (req, res) => {
   try {
-    const items = await Item.find().sort({ createdAt: -1 });
-    res.json(items);
+    const posts = await Post.find().sort({ createdAt: -1 });
+    res.json(posts);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// GET single item
-app.get('/api/items/:id', async (req, res) => {
+// GET single post
+app.get('/api/posts/:id', async (req, res) => {
   try {
-    const item = await Item.findById(req.params.id);
-    if (!item) return res.status(404).json({ error: 'Item not found' });
-    res.json(item);
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: 'Post not found' });
+    res.json(post);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// POST create item
-app.post('/api/items', async (req, res) => {
+// POST create post
+app.post('/api/posts', async (req, res) => {
   try {
-    const { name, description } = req.body;
-    if (!name) return res.status(400).json({ error: 'Name is required' });
-    
-    const item = await Item.create({ name, description });
-    res.status(201).json(item);
+    const { title, fileLink, description } = req.body;
+    if (!title || !fileLink) {
+      return res.status(400).json({ error: 'Title and fileLink are required' });
+    }
+
+    const post = await Post.create({ title, fileLink, description });
+    res.status(201).json(post);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// PUT update item
-app.put('/api/items/:id', async (req, res) => {
+// PUT update post
+app.put('/api/posts/:id', async (req, res) => {
   try {
-    const { name, description } = req.body;
-    const item = await Item.findByIdAndUpdate(
+    const { title, fileLink, description } = req.body;
+    const post = await Post.findByIdAndUpdate(
       req.params.id,
-      { name, description },
+      { title, fileLink, description },
       { new: true, runValidators: true }
     );
-    if (!item) return res.status(404).json({ error: 'Item not found' });
-    res.json(item);
+    if (!post) return res.status(404).json({ error: 'Post not found' });
+    res.json(post);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// DELETE item
-app.delete('/api/items/:id', async (req, res) => {
+// DELETE post
+app.delete('/api/posts/:id', async (req, res) => {
   try {
-    const item = await Item.findByIdAndDelete(req.params.id);
-    if (!item) return res.status(404).json({ error: 'Item not found' });
-    res.json({ message: 'Item deleted successfully' });
+    const post = await Post.findByIdAndDelete(req.params.id);
+    if (!post) return res.status(404).json({ error: 'Post not found' });
+    res.json({ message: 'Post deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
