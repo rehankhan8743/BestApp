@@ -106,10 +106,10 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// React Router fallback
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/dist/index.html'));
-});
+// React Router fallback - commented out for now
+// app.get('/{*path}', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'client/dist/index.html'));
+// });
 
 // Start Server
 app.listen(PORT, () => {
