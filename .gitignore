@@ -5,9 +5,6 @@ client/node_modules
 # Environment
 .env
 
-# Build output
-client/dist
-
 # OS
 .DS_Store
 
@@ -18,3 +15,5 @@ npm-debug.log*
 # IDE
 .vscode/
 .idea/
+
+# Note: client/dist is now included for Render deployment
