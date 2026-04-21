@@ -15,6 +15,11 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files from React build
 app.use(express.static(path.join(__dirname, 'client/dist')));
 
+// Root route - serve index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/dist/index.html'));
+});
+
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/bestapp';
 
@@ -106,10 +111,10 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// React Router fallback - commented out for now
-// app.get('/{*path}', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'client/dist/index.html'));
-// });
+// React Router fallback - serve index.html for all non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/dist/index.html'));
+});
 
 // Start Server
 app.listen(PORT, () => {
