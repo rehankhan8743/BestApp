@@ -111,8 +111,8 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// React Router fallback - serve index.html for all non-API routes
-app.get('*', (req, res) => {
+// React Router fallback - serve index.html for all non-API routes (Express 5.0 syntax)
+app.get('/{*path}', (req, res) => {
   res.sendFile(path.join(__dirname, 'client/dist/index.html'));
 });
 
