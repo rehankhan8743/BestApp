@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const Category = require('../models/Category');
-const { hashPassword } = require('../utils/auth');
+const { hashPassword } = require('../utils/auth.js');
 const { protect, adminOnly } = require('../middleware/auth');
 
 // @route   POST /api/seed
