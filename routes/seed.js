@@ -24,6 +24,7 @@ router.post('/', async (req, res, next) => {
     // Create admin user
     const hashedPassword = await hashPassword('admin123');
     const admin = await User.create({
+      username: 'admin',
       name: 'Administrator',
       email: 'admin@bestapp.com',
       password: hashedPassword,
