@@ -1,19 +1,9 @@
-# Dependencies
-node_modules
-client/node_modules
-
-# Environment
+node_modules/
+uploads/
 .env
-
-# OS
-.DS_Store
-
-# Logs
+.env.local
 *.log
-npm-debug.log*
-
-# IDE
+.DS_Store
+coverage/
 .vscode/
 .idea/
-
-# Note: client/dist is now included for Render deployment
