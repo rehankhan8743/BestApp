@@ -72,6 +72,30 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'API is running', timestamp: new Date().toISOString() });
 });
 
+// Root welcome route
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Welcome to BestApp Forum API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      categories: '/api/categories',
+      threads: '/api/threads',
+      posts: '/api/posts',
+      users: '/api/users',
+      search: '/api/search',
+      uploads: '/api/uploads'
+    },
+    documentation: 'https://github.com/rehankhan8743/BestApp'
+  });
+});
+
+// Seed database route (admin only)
+const seedRoutes = require('./routes/seed');
+app.use('/api/seed', seedRoutes);
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
