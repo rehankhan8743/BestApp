@@ -7,3 +7,5 @@ uploads/
 coverage/
 .vscode/
 .idea/
+.DS_Store
+Thumbs.db

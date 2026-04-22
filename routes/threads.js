@@ -7,7 +7,7 @@ const User = require('../models/User');
 const Notification = require('../models/Notification');
 const { protect, moderatorOnly } = require('../middleware/auth');
 const { createThreadValidator } = require('../middleware/validator');
-const { generateSlug, generateUniqueSlug, sanitizeContent } = require('../utils/helpers');
+const { generateSlug, generateUniqueSlug, sanitizeContent } = require('../utils/helpers.js');
 
 // @route   GET /api/threads
 // @desc    Get all threads (with filters)

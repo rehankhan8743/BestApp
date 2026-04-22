@@ -7,7 +7,7 @@ const Category = require('../models/Category');
 const Notification = require('../models/Notification');
 const { protect, moderatorOnly } = require('../middleware/auth');
 const { createPostValidator } = require('../middleware/validator');
-const { sanitizeContent } = require('../utils/helpers');
+const { sanitizeContent } = require('../utils/helpers.js');
 
 // @route   POST /api/posts
 // @desc    Create new post/reply

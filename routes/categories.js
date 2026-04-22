@@ -3,7 +3,7 @@ const router = express.Router();
 const Category = require('../models/Category');
 const Thread = require('../models/Thread');
 const { protect, adminOnly } = require('../middleware/auth');
-const { generateSlug, generateUniqueSlug } = require('../utils/helpers');
+const { generateSlug, generateUniqueSlug } = require('../utils/helpers.js');
 
 // @route   GET /api/categories
 // @desc    Get all categories with subcategories
