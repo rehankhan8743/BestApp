@@ -7,7 +7,7 @@ import { formatDate, getRankColor } from '../utils/helpers';
 
 const UserProfilePage = () => {
   const { username } = useParams();
-  const { get } = useApi();
+  const { get, put } = useApi();
   const { user: currentUser } = useAuth();
   
   const [profile, setProfile] = useState(null);
@@ -29,23 +29,22 @@ const UserProfilePage = () => {
   const loadProfile = async () => {
     try {
       setLoading(true);
-      const [profileRes, threadsRes, postsRes] = await Promise.all([
+      const [profileRes, threadsRes] = await Promise.all([
         get(`/users/${username}`),
-        get(`/users/${username}/threads?limit=5`),
-        get(`/users/${username}/posts?limit=5`)
+        get(`/users/${username}/threads?limit=5`)
       ]);
 
       if (profileRes?.success) {
         setProfile(profileRes.data);
         setIsFollowing(profileRes.data.isFollowing || false);
         setEditData({
-          bio: profileRes.data.bio || '',
-          location: profileRes.data.location || '',
-          website: profileRes.data.website || ''
+          bio: profileRes.data.user?.bio || profileRes.data.bio || '',
+          location: profileRes.data.user?.location || profileRes.data.location || '',
+          website: profileRes.data.user?.website || profileRes.data.website || ''
         });
       }
       if (threadsRes?.success) setRecentThreads(threadsRes.data || []);
-      if (postsRes?.success) setRecentPosts(postsRes.data || []);
+      setRecentPosts(profileRes?.data?.recentPosts || []);
     } catch (error) {
       console.error('Failed to load profile:', error);
     } finally {
@@ -72,10 +71,7 @@ const UserProfilePage = () => {
 
   const handleEditProfile = async () => {
     try {
-      const res = await get('/users/profile/update', {
-        method: 'PUT',
-        body: editData
-      });
+      const res = await put('/users/profile', editData);
 
       if (res?.success) {
         setProfile(prev => prev ? ({
@@ -83,6 +79,9 @@ const UserProfilePage = () => {
           ...editData
         }) : null);
         setShowEditModal(false);
+        alert('Profile updated successfully!');
+      } else {
+        alert(res?.message || 'Failed to update profile');
       }
     } catch (error) {
       console.error('Failed to update profile:', error);
