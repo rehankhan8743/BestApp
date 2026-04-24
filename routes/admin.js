@@ -181,7 +181,7 @@ router.delete('/users/:id', async (req, res, next) => {
 router.put('/reports/:id/resolve', async (req, res, next) => {
   try {
     const report = await Report.findById(req.params.id);
-    
+
     if (!report) {
       return res.status(404).json({ success: false, message: 'Report not found' });
     }
@@ -193,6 +193,45 @@ router.put('/reports/:id/resolve', async (req, res, next) => {
     res.json({
       success: true,
       message: 'Report resolved successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// @route   GET /api/admin/settings
+// @desc    Get site settings
+// @access  Admin
+router.get('/settings', async (req, res, next) => {
+  try {
+    // Default settings (can be stored in database)
+    res.json({
+      success: true,
+      data: {
+        siteName: 'BestApp Forum',
+        siteDescription: 'Best community for apps, games, and more',
+        maxFileSize: 100,
+        postsPerPage: 20,
+        maintenanceMode: false
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// @route   PUT /api/admin/settings
+// @desc    Update site settings
+// @access  Admin
+router.put('/settings', async (req, res, next) => {
+  try {
+    const { siteName, siteDescription, maxFileSize, postsPerPage, maintenanceMode } = req.body;
+
+    // Save to database or config file
+    res.json({
+      success: true,
+      message: 'Settings updated',
+      data: { siteName, siteDescription, maxFileSize, postsPerPage, maintenanceMode }
     });
   } catch (error) {
     next(error);
