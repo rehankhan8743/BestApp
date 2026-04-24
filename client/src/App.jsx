@@ -1,155 +1,133 @@
-import { useState, useEffect } from 'react'
-import axios from 'axios'
-import './App.css'
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
 
-function App() {
-  const [posts, setPosts] = useState([])
-  const [form, setForm] = useState({ title: '', fileLink: '', description: '' })
+// Components
+import Navbar from './components/Navbar';
 
-  useEffect(() => {
-    fetchPosts()
-  }, [])
+// Pages
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
-  const fetchPosts = async () => {
-    try {
-      const response = await axios.get('/api/posts')
-      setPosts(response.data)
-    } catch (error) {
-      console.error('Error fetching posts:', error)
-    }
+// Placeholder pages (to be implemented)
+const CategoriesPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Categories</h1></div>;
+const ThreadPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Thread</h1></div>;
+const NewThreadPage = () => <div className="p-8"><h1 className="text-3xl font-bold">New Thread</h1></div>;
+const UserProfilePage = () => <div className="p-8"><h1 className="text-3xl font-bold">User Profile</h1></div>;
+const NotificationsPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Notifications</h1></div>;
+const MessagesPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Messages</h1></div>;
+const AdminPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Admin Panel</h1></div>;
+const TrendingPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Trending</h1></div>;
+const LatestPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Latest</h1></div>;
+
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      await axios.post('/api/posts', form)
-      setForm({ title: '', fileLink: '', description: '' })
-      fetchPosts()
-    } catch (error) {
-      console.error('Error creating post:', error)
-    }
+  if (!user) {
+    return <Navigate to="/login" replace />;
   }
 
+  return children;
+};
+
+// Admin Route Component
+const AdminRoute = ({ children }) => {
+  const { user, loading, isAdmin } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!user || !isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+const App = () => {
   return (
-    <div className="app-container">
-      {/* Header */}
-      <header className="header">
-        <div className="header-content">
-          <h1 className="logo">🚀 BestApp</h1>
-          <p className="tagline">Share & Download Free Apps</p>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navbar />
+      <main>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
+          <Route path="/category/:slug" element={<CategoriesPage />} />
+          <Route path="/thread/:slug" element={<ThreadPage />} />
+          <Route path="/trending" element={<TrendingPage />} />
+          <Route path="/latest" element={<LatestPage />} />
+          <Route path="/user/:username" element={<UserProfilePage />} />
 
-      {/* Main Content */}
-      <main className="main-content">
-        {/* Share App Form */}
-        <section className="form-section">
-          <div className="container">
-            <h2 className="section-title">📱 Share an App</h2>
-            <form onSubmit={handleSubmit} className="app-form">
-              <div className="form-group">
-                <label htmlFor="title">App Name</label>
-                <input
-                  id="title"
-                  type="text"
-                  placeholder="e.g., WhatsApp, Telegram"
-                  value={form.title}
-                  onChange={e => setForm({...form, title: e.target.value})}
-                  required
-                  className="form-input"
-                />
-              </div>
+          {/* Protected Routes */}
+          <Route path="/new-thread" element={
+            <ProtectedRoute>
+              <NewThreadPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/notifications" element={
+            <ProtectedRoute>
+              <NotificationsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/messages" element={
+            <ProtectedRoute>
+              <MessagesPage />
+            </ProtectedRoute>
+          } />
 
-              <div className="form-group">
-                <label htmlFor="fileLink">Download Link</label>
-                <input
-                  id="fileLink"
-                  type="url"
-                  placeholder="https://drive.google.com/... or https://t.me/..."
-                  value={form.fileLink}
-                  onChange={e => setForm({...form, fileLink: e.target.value})}
-                  required
-                  className="form-input"
-                />
-              </div>
+          {/* Admin Routes */}
+          <Route path="/admin" element={
+            <AdminRoute>
+              <AdminPage />
+            </AdminRoute>
+          } />
 
-              <div className="form-group">
-                <label htmlFor="description">Description</label>
-                <textarea
-                  id="description"
-                  placeholder="Describe the app (features, version, etc.)"
-                  value={form.description}
-                  onChange={e => setForm({...form, description: e.target.value})}
-                  rows="4"
-                  className="form-textarea"
-                />
+          {/* 404 */}
+          <Route path="*" element={
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="text-center">
+                <h1 className="text-6xl font-bold text-gray-300 dark:text-gray-700 mb-4">404</h1>
+                <p className="text-xl text-gray-600 dark:text-gray-400 mb-6">Page not found</p>
+                <a href="/" className="text-blue-600 hover:underline">Go home</a>
               </div>
-
-              <button type="submit" className="submit-btn">
-                📤 Post App
-              </button>
-            </form>
-          </div>
-        </section>
-
-        {/* Apps List */}
-        <section className="apps-section">
-          <div className="container">
-            <h2 className="section-title">
-              📋 All Apps 
-              <span className="apps-count">({posts.length})</span>
-            </h2>
-            
-            {posts.length === 0 ? (
-              <div className="empty-state">
-                <div className="empty-icon">🎉</div>
-                <p>No apps posted yet.</p>
-                <p className="empty-subtitle">Be the first to share an app!</p>
-              </div>
-            ) : (
-              <div className="apps-grid">
-                {posts.map(post => (
-                  <div key={post._id} className="app-card">
-                    <div className="card-header">
-                      <h3 className="card-title">{post.title}</h3>
-                      <span className="card-date">
-                        {new Date(post.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </span>
-                    </div>
-                    
-                    <p className="card-description">
-                      {post.description || 'No description provided'}
-                    </p>
-                    
-                    <div className="card-footer">
-                      <a
-                        href={post.fileLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="download-btn"
-                      >
-                        ⬇️ Download
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
+            </div>
+          } />
+        </Routes>
       </main>
 
       {/* Footer */}
-      <footer className="footer">
-        <p>Made with ❤️ using MERN Stack</p>
-        <p className="footer-note">Share free apps with the community!</p>
+      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center text-gray-500 dark:text-gray-400">
+            <p>&copy; 2024 BestApp Forum. All rights reserved.</p>
+            <div className="mt-4 space-x-4">
+              <a href="/terms" className="hover:text-blue-600 dark:hover:text-blue-400">Terms</a>
+              <a href="/privacy" className="hover:text-blue-600 dark:hover:text-blue-400">Privacy</a>
+              <a href="/contact" className="hover:text-blue-600 dark:hover:text-blue-400">Contact</a>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;

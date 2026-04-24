@@ -14,6 +14,7 @@ const threadRoutes = require('./routes/threads');
 const postRoutes = require('./routes/posts');
 const searchRoutes = require('./routes/search');
 const uploadRoutes = require('./routes/uploads');
+const seedRoutes = require('./routes/seed');
 
 // Load env vars
 require('dotenv').config();
@@ -92,9 +93,18 @@ app.get('/', (req, res) => {
   });
 });
 
-// Seed database route (admin only)
-const seedRoutes = require('./routes/seed');
+// Seed database route
 app.use('/api/seed', seedRoutes);
+
+// Serve static files from React build in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'client', 'dist')));
+
+  // Handle React routing - return all requests to React app
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+  });
+}
 
 // 404 handler
 app.use((req, res) => {
