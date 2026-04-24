@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const { verifyPassword } = require('../utils/auth');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { protect } = require('../middleware/auth');
@@ -28,8 +29,8 @@ router.post('/register', registerValidator, async (req, res, next) => {
       });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const { hashPassword } = require('../utils/auth');
+    const hashedPassword = await hashPassword(password);
 
     const user = await User.create({
       username,
@@ -66,7 +67,7 @@ router.post('/login', loginValidator, async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await verifyPassword(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
