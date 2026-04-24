@@ -12,24 +12,24 @@ const { protect, adminOnly } = require('../middleware/auth');
 router.post('/', async (req, res, next) => {
   try {
     // Check if admin already exists
-    const adminExists = await User.findOne({ role: 'admin' });
+    let admin = await User.findOne({ role: 'admin' });
 
-    if (adminExists) {
+    if (admin) {
       // Always reset admin password when seed is called
       const hashedPassword = await hashPassword('admin123');
-      adminExists.password = hashedPassword;
-      adminExists.isVerified = true;
-      adminExists.isActive = true;
-      await adminExists.save();
+      admin.password = hashedPassword;
+      admin.isVerified = true;
+      admin.isActive = true;
+      await admin.save();
 
-      console.log('Admin password reset:', adminExists.email);
+      console.log('Admin password reset:', admin.email);
 
       return res.json({
         success: true,
         message: 'Admin password reset successfully!',
         data: {
           admin: {
-            email: adminExists.email,
+            email: admin.email,
             password: 'admin123'
           }
         }
@@ -38,7 +38,7 @@ router.post('/', async (req, res, next) => {
 
     // Create admin user
     const hashedPassword = await hashPassword('admin123');
-    const admin = await User.create({
+    admin = await User.create({
       username: 'admin',
       name: 'Administrator',
       email: 'admin@bestapp.com',
