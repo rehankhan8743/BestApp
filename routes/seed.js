@@ -13,11 +13,26 @@ router.post('/', async (req, res, next) => {
   try {
     // Check if admin already exists
     const adminExists = await User.findOne({ role: 'admin' });
-    
+
     if (adminExists) {
-      return res.status(400).json({
-        success: false,
-        message: 'Database already seeded. Admin user exists.'
+      // Reset admin password if already exists
+      const hashedPassword = await hashPassword('admin123');
+      adminExists.password = hashedPassword;
+      adminExists.isVerified = true;
+      adminExists.isActive = true;
+      await adminExists.save();
+
+      console.log('Admin password reset:', adminExists.email);
+
+      return res.json({
+        success: true,
+        message: 'Admin password reset successfully!',
+        data: {
+          admin: {
+            email: adminExists.email,
+            password: 'admin123'
+          }
+        }
       });
     }
 
