@@ -59,6 +59,11 @@ app.use(express.urlencoded({ extended: true }));
 // Static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve static files from React build in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'client', 'dist')));
+}
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -73,34 +78,33 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'API is running', timestamp: new Date().toISOString() });
 });
 
-// Root welcome route
-app.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Welcome to BestApp Forum API',
-    version: '1.0.0',
-    endpoints: {
-      health: '/api/health',
-      auth: '/api/auth',
-      categories: '/api/categories',
-      threads: '/api/threads',
-      posts: '/api/posts',
-      users: '/api/users',
-      search: '/api/search',
-      uploads: '/api/uploads'
-    },
-    documentation: 'https://github.com/rehankhan8743/BestApp'
+// Root welcome route (only for API, not in production)
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/', (req, res) => {
+    res.json({
+      success: true,
+      message: 'Welcome to BestApp Forum API',
+      version: '1.0.0',
+      endpoints: {
+        health: '/api/health',
+        auth: '/api/auth',
+        categories: '/api/categories',
+        threads: '/api/threads',
+        posts: '/api/posts',
+        users: '/api/users',
+        search: '/api/search',
+        uploads: '/api/uploads'
+      },
+      documentation: 'https://github.com/rehankhan8743/BestApp'
+    });
   });
-});
+}
 
 // Seed database route
 app.use('/api/seed', seedRoutes);
 
-// Serve static files from React build in production
+// Handle React routing in production - return all requests to React app
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'client', 'dist')));
-
-  // Handle React routing - return all requests to React app
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
   });
