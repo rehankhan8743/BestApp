@@ -59,10 +59,23 @@ router.get('/', async (req, res, next) => {
 // @access  Public
 router.get('/trending', async (req, res, next) => {
   try {
-    const threads = await Thread.find({ isDeleted: false })
+    const range = req.query.range || 'week';
+    const daysAgo = {
+      day: 1,
+      week: 7,
+      month: 30
+    }[range] || 7;
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - daysAgo);
+
+    const threads = await Thread.find({
+      isDeleted: false,
+      createdAt: { $gte: startDate }
+    })
       .sort('-views -repliesCount')
-      .limit(10)
-      .populate('author', 'username avatar')
+      .limit(20)
+      .populate('author', 'username avatar rank')
       .populate('category', 'name slug color');
 
     res.json({ success: true, data: threads });
@@ -76,10 +89,15 @@ router.get('/trending', async (req, res, next) => {
 // @access  Public
 router.get('/latest', async (req, res, next) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
     const threads = await Thread.find({ isDeleted: false })
       .sort('-createdAt')
-      .limit(10)
-      .populate('author', 'username avatar')
+      .skip(skip)
+      .limit(limit)
+      .populate('author', 'username avatar rank')
       .populate('category', 'name slug color');
 
     res.json({ success: true, data: threads });

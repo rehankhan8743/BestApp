@@ -10,16 +10,14 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
-
-// Placeholder pages (to be implemented)
-const CategoriesPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Categories</h1></div>;
-const ThreadPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Thread</h1></div>;
-const NewThreadPage = () => <div className="p-8"><h1 className="text-3xl font-bold">New Thread</h1></div>;
-const UserProfilePage = () => <div className="p-8"><h1 className="text-3xl font-bold">User Profile</h1></div>;
-const NotificationsPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Notifications</h1></div>;
-const MessagesPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Messages</h1></div>;
-const TrendingPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Trending</h1></div>;
-const LatestPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Latest</h1></div>;
+import CategoriesPage from './pages/CategoriesPage';
+import ThreadPage from './pages/ThreadPage';
+import NewThreadPage from './pages/NewThreadPage';
+import UserProfilePage from './pages/UserProfilePage';
+import NotificationsPage from './pages/NotificationsPage';
+import MessagesPage from './pages/MessagesPage';
+import TrendingPage from './pages/TrendingPage';
+import LatestPage from './pages/LatestPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
