@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import { useAuth } from '../contexts/AuthContext';
-import { Calendar, MessageSquare, Award, MapPin, Link as LinkIcon, Eye, Clock } from 'lucide-react';
+import { Calendar, MessageSquare, Award, MapPin, Link as LinkIcon, Eye, Clock, Trophy } from 'lucide-react';
 import { formatDate, getRankColor } from '../utils/helpers';
 
 const UserProfilePage = () => {
@@ -170,7 +170,14 @@ const UserProfilePage = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               <StatItem icon={<MessageSquare className="w-5 h-5" />} label="Posts" value={profile.postsCount || 0} />
               <StatItem icon={<Eye className="w-5 h-5" />} label="Followers" value={profile.followersCount || 0} />
-              <StatItem icon={<Award className="w-5 h-5" />} label="Reputation" value={profile.reputation || 0} />
+              <Link to={`/user/${profile.username}/reputation`} className="block">
+                <StatItem
+                  icon={<Trophy className="w-5 h-5 text-yellow-600" />}
+                  label="Reputation"
+                  value={profile.reputation || 0}
+                  className="hover:bg-blue-50 cursor-pointer transition-colors"
+                />
+              </Link>
               <StatItem icon={<Clock className="w-5 h-5" />} label="Days Active" value={profile.daysActive || 0} />
             </div>
 

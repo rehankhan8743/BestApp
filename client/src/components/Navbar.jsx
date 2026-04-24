@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell, MessageSquare, User, LogOut, Sun, Moon, Menu, X, Search, Bookmark, Shield } from 'lucide-react';
+import { Bell, MessageSquare, User, LogOut, Sun, Moon, Menu, X, Search, Bookmark, Shield, Settings } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNotifications } from '../hooks/useNotifications';
@@ -136,12 +136,19 @@ const Navbar = () => {
 
                   {/* Dropdown */}
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
-                    <Link 
+                    <Link
                       to={`/user/${user.username}`}
                       className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <User className="w-4 h-4" />
                       Profile
+                    </Link>
+                    <Link
+                      to="/settings"
+                      className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <Settings className="w-4 h-4" />
+                      Settings
                     </Link>
                     {isAdmin && (
                       <Link
@@ -249,6 +256,14 @@ const Navbar = () => {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Bookmarks
+                  </Link>
+                  <Link
+                    to="/settings"
+                    className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Settings className="w-4 h-4" />
+                    Settings
                   </Link>
                   {isAdmin && (
                     <Link

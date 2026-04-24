@@ -11,6 +11,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ModeratorDashboard from './pages/ModeratorDashboard';
+import SettingsPage from './pages/SettingsPage';
+import ReputationPage from './pages/ReputationPage';
 import CategoriesPage from './pages/CategoriesPage';
 import ThreadPage from './pages/ThreadPage';
 import NewThreadPage from './pages/NewThreadPage';
@@ -123,6 +125,16 @@ const App = () => {
           <Route path="/post/:postId/edit" element={
             <ProtectedRoute>
               <EditPostPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <SettingsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/user/:username/reputation" element={
+            <ProtectedRoute>
+              <ReputationPage />
             </ProtectedRoute>
           } />
 
