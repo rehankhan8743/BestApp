@@ -64,7 +64,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Serve static files from React build in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'client', 'dist')));
+  // Use process.cwd() for reliable path resolution in production
+  const distPath = path.join(process.cwd(), 'client', 'dist');
+  app.use(express.static(distPath));
 }
 
 // API Routes
@@ -109,7 +111,8 @@ app.use('/api/seed', seedRoutes);
 // Handle React routing in production - return all requests to React app
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+    const indexPath = path.join(process.cwd(), 'client', 'dist', 'index.html');
+    res.sendFile(indexPath);
   });
 }
 
