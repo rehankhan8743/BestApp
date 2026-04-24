@@ -24,6 +24,9 @@ connectDB();
 
 const app = express();
 
+// Trust proxy for Render (behind load balancer)
+app.set('trust proxy', true);
+
 // Security middleware
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }
