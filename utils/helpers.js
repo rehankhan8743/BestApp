@@ -90,6 +90,23 @@ function sanitizeString(str) {
 }
 
 /**
+ * Sanitize rich content (allows safe HTML, removes dangerous scripts)
+ * @param {string} content - HTML/BBCode content
+ * @returns {string} Sanitized content
+ */
+function sanitizeContent(content) {
+  if (!content) return '';
+
+  // Remove script tags and javascript: protocols
+  let sanitized = content
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '');
+
+  return sanitized;
+}
+
+/**
  * Parse BBCode to HTML (basic implementation)
  * @param {string} text - Text with BBCode
  * @returns {string} HTML
@@ -133,5 +150,6 @@ module.exports = {
   formatDate,
   timeAgo,
   sanitizeString,
+  sanitizeContent,
   parseBBCode
 };
