@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
 const Notification = require('../models/Notification');
-const Message = require('../models/Message');
+const PrivateMessage = require('../models/PrivateMessage');
 const User = require('../models/User');
 
 // All routes require authentication
@@ -108,7 +108,13 @@ router.delete('/:id', async (req, res, next) => {
 // @access  Private
 router.get('/conversations', async (req, res, next) => {
   try {
-    const conversations = await Message.getConversations(req.user._id);
+    const conversations = await PrivateMessage.find({
+      participants: req.user._id,
+      isDeleted: false
+    })
+      .populate('participants', 'username avatar role rank')
+      .sort({ updatedAt: -1 });
+
     res.json({ success: true, data: conversations });
   } catch (error) {
     next(error);
@@ -118,26 +124,16 @@ router.get('/conversations', async (req, res, next) => {
 // @route   GET /api/messages/:conversationId
 // @desc    Get messages in a conversation
 // @access  Private
-router.get('/:conversationId', async (req, res, next) => {
+router.get('/:userId', async (req, res, next) => {
   try {
-    const { conversationId } = req.params;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50;
-    const skip = (page - 1) * limit;
-
-    const messages = await Message.find({
-      $or: [
-        { sender: req.user._id, recipient: conversationId },
-        { sender: conversationId, recipient: req.user._id }
-      ]
+    const messages = await PrivateMessage.findOne({
+      participants: { $all: [req.user._id, req.params.userId] },
+      isDeleted: false
     })
-      .sort({ createdAt: 1 })
-      .skip(skip)
-      .limit(limit)
-      .populate('sender', 'username avatar role rank')
-      .populate('recipient', 'username avatar');
+      .populate('messages.sender', 'username avatar role rank')
+      .populate('messages.recipient', 'username avatar');
 
-    res.json({ success: true, data: messages });
+    res.json({ success: true, data: messages?.messages || [] });
   } catch (error) {
     next(error);
   }
@@ -162,11 +158,28 @@ router.post('/', async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    const message = await Message.create({
-      sender: req.user._id,
-      recipient: recipientId,
-      content: content.trim()
+    // Find or create conversation
+    let conversation = await PrivateMessage.findOne({
+      participants: { $all: [req.user._id, recipientId] },
+      isDeleted: false
     });
+
+    if (!conversation) {
+      conversation = await PrivateMessage.create({
+        participants: [req.user._id, recipientId],
+        subject: `Conversation with ${recipient.username}`,
+        messages: []
+      });
+    }
+
+    // Add message to conversation
+    conversation.messages.push({
+      sender: req.user._id,
+      content: content.trim(),
+      isRead: false
+    });
+
+    await conversation.save();
 
     // Create notification for recipient
     await Notification.create({
@@ -176,14 +189,10 @@ router.post('/', async (req, res, next) => {
       relatedUser: req.user._id
     });
 
-    const populatedMessage = await Message.findById(message._id)
-      .populate('sender', 'username avatar')
-      .populate('recipient', 'username avatar');
-
     res.status(201).json({
       success: true,
       message: 'Message sent',
-      data: populatedMessage
+      data: conversation
     });
   } catch (error) {
     next(error);
@@ -195,12 +204,13 @@ router.post('/', async (req, res, next) => {
 // @access  Private
 router.delete('/conversation/:userId', async (req, res, next) => {
   try {
-    await Message.deleteMany({
-      $or: [
-        { sender: req.user._id, recipient: req.params.userId },
-        { sender: req.params.userId, recipient: req.user._id }
-      ]
-    });
+    await PrivateMessage.updateOne(
+      {
+        participants: { $all: [req.user._id, req.params.userId] },
+        isDeleted: false
+      },
+      { isDeleted: true }
+    );
 
     res.json({ success: true, message: 'Conversation deleted' });
   } catch (error) {
