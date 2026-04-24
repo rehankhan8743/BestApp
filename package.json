@@ -10,7 +10,8 @@
     "client:install": "cd client && npm install",
     "client:build": "cd client && npm run build",
     "build": "npm run client:install && npm run client:build",
-    "heroku-postbuild": "npm run build"
+    "heroku-postbuild": "npm run build",
+    "postinstall": "cd client && npm install && npm run build"
   },
   "keywords": [
     "forum",
