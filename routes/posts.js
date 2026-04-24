@@ -252,4 +252,29 @@ router.post('/:id/report', protect, async (req, res, next) => {
   }
 });
 
+// @route   GET /api/posts/search
+// @desc    Search posts
+// @access  Public
+router.get('/search', async (req, res, next) => {
+  try {
+    const q = req.query.q || '';
+
+    const posts = await Post.find({
+      isDeleted: false,
+      content: { $regex: q, $options: 'i' }
+    })
+      .populate('author', 'username avatar role rank')
+      .populate('thread', 'title slug')
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    res.json({
+      success: true,
+      data: posts
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell, MessageSquare, User, LogOut, Sun, Moon, Menu, X } from 'lucide-react';
+import { Bell, MessageSquare, User, LogOut, Sun, Moon, Menu, X, Search, Bookmark } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNotifications } from '../hooks/useNotifications';
@@ -61,6 +61,15 @@ const Navbar = () => {
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
+            {/* Search */}
+            <Link
+              to="/search"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              aria-label="Search"
+            >
+              <Search className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+            </Link>
+
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -76,6 +85,15 @@ const Navbar = () => {
 
             {user ? (
               <>
+                {/* Bookmarks */}
+                <Link
+                  to="/bookmarks"
+                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative"
+                  aria-label="Bookmarks"
+                >
+                  <Bookmark className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+                </Link>
+
                 {/* Notifications */}
                 <Link 
                   to="/notifications"
@@ -178,34 +196,50 @@ const Navbar = () => {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex flex-col gap-2">
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
               </Link>
-              <Link 
-                to="/categories" 
+              <Link
+                to="/categories"
                 className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Categories
               </Link>
-              <Link 
-                to="/trending" 
+              <Link
+                to="/trending"
                 className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Trending
               </Link>
-              <Link 
-                to="/latest" 
+              <Link
+                to="/latest"
                 className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Latest
               </Link>
+              <Link
+                to="/search"
+                className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Search
+              </Link>
+              {user && (
+                <Link
+                  to="/bookmarks"
+                  className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Bookmarks
+                </Link>
+              )}
               {!user && (
                 <>
                   <Link 

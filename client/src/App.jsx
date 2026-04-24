@@ -18,6 +18,8 @@ import NotificationsPage from './pages/NotificationsPage';
 import MessagesPage from './pages/MessagesPage';
 import TrendingPage from './pages/TrendingPage';
 import LatestPage from './pages/LatestPage';
+import SearchPage from './pages/SearchPage';
+import BookmarksPage from './pages/BookmarksPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -74,6 +76,7 @@ const App = () => {
           <Route path="/trending" element={<TrendingPage />} />
           <Route path="/latest" element={<LatestPage />} />
           <Route path="/user/:username" element={<UserProfilePage />} />
+          <Route path="/search" element={<SearchPage />} />
 
           {/* Protected Routes */}
           <Route path="/new-thread" element={
@@ -89,6 +92,11 @@ const App = () => {
           <Route path="/messages" element={
             <ProtectedRoute>
               <MessagesPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/bookmarks" element={
+            <ProtectedRoute>
+              <BookmarksPage />
             </ProtectedRoute>
           } />
 

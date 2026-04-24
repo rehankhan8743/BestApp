@@ -339,4 +339,81 @@ router.post('/:id/lock', protect, moderatorOnly, async (req, res, next) => {
   }
 });
 
+// @route   POST /api/threads/:id/bookmark
+// @desc    Add/remove bookmark
+// @access  Private
+router.post('/:id/bookmark', protect, async (req, res, next) => {
+  try {
+    const thread = await Thread.findById(req.params.id);
+    if (!thread) {
+      return res.status(404).json({ success: false, message: 'Thread not found' });
+    }
+
+    const user = await User.findById(req.user._id);
+    const bookmarkIndex = user.bookmarks?.findIndex(
+      b => b.toString() === req.params.id
+    );
+
+    if (bookmarkIndex > -1) {
+      // Remove bookmark
+      user.bookmarks.splice(bookmarkIndex, 1);
+    } else {
+      // Add bookmark
+      if (!user.bookmarks) user.bookmarks = [];
+      user.bookmarks.push(req.params.id);
+    }
+
+    await user.save();
+    res.json({
+      success: true,
+      message: bookmarkIndex > -1 ? 'Bookmark removed' : 'Bookmark added',
+      data: { bookmarked: bookmarkIndex === -1 }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// @route   GET /api/threads/search
+// @desc    Search threads
+// @access  Public
+router.get('/search', async (req, res, next) => {
+  try {
+    const q = req.query.q || '';
+    const category = req.query.category;
+    const type = req.query.type;
+
+    const query = { isDeleted: false };
+
+    if (q) {
+      query.$or = [
+        { title: { $regex: q, $options: 'i' } },
+        { content: { $regex: q, $options: 'i' } },
+        { tags: { $regex: q, $options: 'i' } }
+      ];
+    }
+
+    if (category) {
+      query.category = category;
+    }
+
+    if (type) {
+      query.type = type;
+    }
+
+    const threads = await Thread.find(query)
+      .populate('author', 'username avatar role rank')
+      .populate('category', 'name slug')
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    res.json({
+      success: true,
+      data: threads
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

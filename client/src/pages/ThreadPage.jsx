@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import { useAuth } from '../contexts/AuthContext';
-import { MessageSquare, Eye, Clock, Heart, Flag, MessageCircle, Pin, Lock } from 'lucide-react';
+import { MessageSquare, Eye, Clock, Heart, Flag, MessageCircle, Pin, Lock, Bookmark } from 'lucide-react';
 import { formatDate, getRankColor } from '../utils/helpers';
 
 const ThreadPage = () => {
@@ -105,6 +105,18 @@ const ThreadPage = () => {
     }
   };
 
+  const handleBookmark = async () => {
+    if (!thread) return;
+    try {
+      const res = await post(`/threads/${thread._id}/bookmark`);
+      if (res?.success) {
+        alert(res.message);
+      }
+    } catch (error) {
+      console.error('Failed to bookmark:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -164,6 +176,15 @@ const ThreadPage = () => {
               <Heart className="w-5 h-5" />
               <span className="text-sm">{thread.likes?.length || 0}</span>
             </button>
+            {user && (
+              <button
+                onClick={handleBookmark}
+                className="p-2 hover:bg-secondary rounded"
+                title="Bookmark"
+              >
+                <Bookmark className="w-5 h-5 text-muted-foreground" />
+              </button>
+            )}
             <button
               onClick={handleReport}
               className="p-2 hover:bg-secondary rounded"

@@ -178,4 +178,90 @@ router.put('/:id/role', protect, adminOnly, async (req, res, next) => {
   }
 });
 
+// @route   GET /api/users/search
+// @desc    Search users
+// @access  Public
+router.get('/search', async (req, res, next) => {
+  try {
+    const q = req.query.q || '';
+
+    const users = await User.find({
+      isBanned: false,
+      $or: [
+        { username: { $regex: q, $options: 'i' } },
+        { bio: { $regex: q, $options: 'i' } }
+      ]
+    })
+      .select('username avatar role threadsCount postsCount reputation')
+      .limit(20);
+
+    res.json({
+      success: true,
+      data: users
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// @route   GET /api/users/profile
+// @desc    Get current user profile
+// @access  Private
+router.get('/profile', protect, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .select('-password');
+
+    res.json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// @route   PUT /api/users/profile
+// @desc    Update current user profile
+// @access  Private
+router.put('/profile', protect, async (req, res, next) => {
+  try {
+    const { bio, location, website } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { bio, location, website },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    res.json({
+      success: true,
+      message: 'Profile updated',
+      data: user
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// @route   GET /api/users/bookmarks
+// @desc    Get user bookmarks
+// @access  Private
+router.get('/bookmarks', protect, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .populate({
+        path: 'bookmarks',
+        select: 'title slug content author category repliesCount views createdAt'
+      });
+
+    res.json({
+      success: true,
+      data: user.bookmarks || []
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
