@@ -159,9 +159,9 @@ router.get('/:slug', async (req, res, next) => {
 // @access  Private
 router.post('/', protect, createThreadValidator, async (req, res, next) => {
   try {
-    const { title, content, category, type, tags, releaseInfo } = req.body;
+    const { title, content, categoryId, subcategoryId, type, tags, releaseInfo } = req.body;
 
-    const cat = await Category.findById(category);
+    const cat = await Category.findById(categoryId);
     if (!cat) {
       return res.status(404).json({ success: false, message: 'Category not found' });
     }
@@ -174,7 +174,8 @@ router.post('/', protect, createThreadValidator, async (req, res, next) => {
       slug,
       content: sanitizeContent(content),
       author: req.user._id,
-      category: category,
+      category: categoryId,
+      subcategory: subcategoryId || undefined,
       type: type || 'discussion',
       tags: tags || [],
       releaseInfo: releaseInfo || undefined
@@ -190,7 +191,7 @@ router.post('/', protect, createThreadValidator, async (req, res, next) => {
       $inc: { threadsCount: 1, reputation: 2 }
     });
 
-    await Category.findByIdAndUpdate(category, {
+    await Category.findByIdAndUpdate(categoryId, {
       $inc: { threadsCount: 1, postsCount: 1 },
       lastThread: thread._id,
       lastPostAt: new Date()

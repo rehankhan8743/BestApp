@@ -43,12 +43,18 @@ const createThreadValidator = [
     .trim()
     .isLength({ min: 10 })
     .withMessage('Content must be at least 10 characters'),
-  body('category')
+  body('categoryId')
     .isMongoId()
     .withMessage('Valid category ID required'),
+  body('subcategoryId')
+    .optional()
+    .isMongoId(),
   body('type')
     .optional()
     .isIn(['discussion', 'request', 'release', 'guide']),
+  body('tags')
+    .optional()
+    .isArray({ max: 5 }),
   handleValidationErrors
 ];
 
