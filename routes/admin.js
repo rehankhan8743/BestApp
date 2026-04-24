@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect, restrictTo } = require('../middleware/auth');
+const { protect, adminOnly } = require('../middleware/auth');
 const User = require('../models/User');
 const Thread = require('../models/Thread');
 const Post = require('../models/Post');
@@ -8,7 +8,7 @@ const Report = require('../models/Report');
 
 // Apply authentication and admin restriction to all routes
 router.use(protect);
-router.use(restrictTo('admin'));
+router.use(adminOnly);
 
 // @route   GET /api/admin/stats
 // @desc    Get dashboard statistics
