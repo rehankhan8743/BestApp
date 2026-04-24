@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useApi } from '../hooks/useApi';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import { useApi } from '../hooks/useApi.js';
 import { useNavigate } from 'react-router-dom';
 import { 
   Lock, Mail, Bell, Shield, Eye, EyeOff, Trash2, 

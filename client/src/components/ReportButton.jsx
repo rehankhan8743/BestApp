@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useApi } from '../hooks/useApi';
+import { useApi } from '../hooks/useApi.js';
 import { Flag, AlertTriangle } from 'lucide-react';
 
 const ReportButton = ({ contentId, contentType = 'post', contentTitle }) => {

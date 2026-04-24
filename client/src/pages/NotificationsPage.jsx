@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useApi } from '../hooks/useApi';
+import { useApi } from '../hooks/useApi.js';
 import { Bell, Check, Trash2, ExternalLink } from 'lucide-react';
 import { formatDate } from '../utils/helpers';
 

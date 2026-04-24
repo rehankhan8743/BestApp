@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useApi } from '../../hooks/useApi';
-import { useAuth } from '../../contexts/AuthContext';
+import { useApi } from '../hooks/useApi.js';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { Edit, Save, X, Image as ImageIcon, Trash2 } from 'lucide-react';
 
 const EditPostPage = () => {

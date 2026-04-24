@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useApi } from '../hooks/useApi';
-import { useAuth } from '../contexts/AuthContext';
+import { useApi } from '../hooks/useApi.js';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { MessageSquare, Eye, Clock, Heart, Flag, MessageCircle, Pin, Lock, Bookmark } from 'lucide-react';
 import { formatDate, getRankColor } from '../utils/helpers';
 

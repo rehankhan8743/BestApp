@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useApi } from '../../hooks/useApi';
-import { useAuth } from '../../contexts/AuthContext';
+import { useApi } from '../hooks/useApi.js';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import {
   AlertTriangle, CheckCircle, Clock, Activity, MessageSquare,
   Ban, UserCheck, Shield, Eye, TrendingUp, Zap

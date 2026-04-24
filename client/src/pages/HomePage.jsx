@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MessageSquare, TrendingUp, Clock, Users } from 'lucide-react';
-import ThreadList from '../components/ThreadList';
-import { useApi } from '../hooks/useApi';
+import ThreadList from '../components/ThreadList.jsx';
+import { useApi } from '../hooks/useApi.js';
 import { threadAPI } from '../services/api';
 
 const HomePage = () => {

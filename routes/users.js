@@ -1,266 +1,392 @@
 const express = require('express');
+const User = require('../models/User.js');
+const Thread = require('../models/Thread.js');
+const Post = require('../models/Post.js');
+const Reputation = require('../models/Reputation.js');
+const { protect } = require('../middleware/auth.js');
+
 const router = express.Router();
-const User = require('../models/User');
-const Thread = require('../models/Thread');
-const Post = require('../models/Post');
-const { protect, adminOnly } = require('../middleware/auth');
 
-// @route   GET /api/users
-// @desc    Get all users (with pagination)
-// @access  Public
-router.get('/', async (req, res, next) => {
+// Get user dashboard stats
+router.get('/dashboard/stats', protect, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
-    const sort = req.query.sort || '-reputation';
-    const search = req.query.search || '';
+    const userId = req.user._id;
+    const days = parseInt(req.query.days) || 30;
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
 
-    const query = { isBanned: false };
-    if (search) {
-      query.$or = [
-        { username: { $regex: search, $options: 'i' } },
-        { bio: { $regex: search, $options: 'i' } }
-      ];
-    }
+    // Get user with populated stats
+    const user = await User.findById(userId);
 
-    const options = {
-      page,
-      limit,
-      sort,
-      select: '-password -email'
-    };
-
-    const users = await User.paginate(query, options);
-
-    res.json({
-      success: true,
-      data: users.docs,
-      pagination: {
-        total: users.totalDocs,
-        page: users.page,
-        pages: users.totalPages,
-        limit: users.limit
-      }
+    // Count threads and posts in period
+    const threadsThisPeriod = await Thread.countDocuments({
+      author: userId,
+      createdAt: { $gte: startDate }
     });
-  } catch (error) {
-    next(error);
-  }
-});
 
-// @route   GET /api/users/:username
-// @desc    Get user profile
-// @access  Public
-router.get('/:username', async (req, res, next) => {
-  try {
-    const user = await User.findOne({ username: req.params.username }).select('-password -email');
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
+    const postsThisPeriod = await Post.countDocuments({
+      author: userId,
+      createdAt: { $gte: startDate }
+    });
 
-    const recentThreads = await Thread.find({ author: user._id, isDeleted: false })
-      .sort('-createdAt')
-      .limit(5)
-      .select('title slug createdAt views repliesCount');
+    // Get total views for user's threads
+    const threads = await Thread.find({ author: userId });
+    const totalViews = threads.reduce((sum, t) => sum + (t.views || 0), 0);
 
-    const recentPosts = await Post.find({ author: user._id, isDeleted: false })
-      .sort('-createdAt')
-      .limit(5)
-      .populate('thread', 'title slug')
-      .select('content createdAt thread');
+    // Get views in period
+    const threadsInPeriod = await Thread.find({
+      author: userId,
+      createdAt: { $gte: startDate }
+    });
+    const viewsThisPeriod = threadsInPeriod.reduce((sum, t) => sum + (t.views || 0), 0);
+
+    // Count likes on user's posts
+    const userPosts = await Post.find({ author: userId });
+    const totalLikes = userPosts.reduce((sum, p) => sum + (p.likes || 0), 0);
+
+    const postsInPeriod = await Post.find({
+      author: userId,
+      createdAt: { $gte: startDate }
+    });
+    const likesThisPeriod = postsInPeriod.reduce((sum, p) => sum + (p.likes || 0), 0);
+
+    // Get followers count
+    const followersCount = user.followers?.length || 0;
+
+    // Get bookmarks count
+    const bookmarksCount = user.bookmarks?.length || 0;
+
+    // Get best answers count
+    const bestAnswers = await Post.countDocuments({
+      author: userId,
+      isBestAnswer: true
+    });
 
     res.json({
       success: true,
       data: {
-        user,
-        recentThreads,
-        recentPosts
+        totalThreads: await Thread.countDocuments({ author: userId }),
+        totalPosts: await Post.countDocuments({ author: userId }),
+        totalViews,
+        totalLikes,
+        followersCount,
+        bookmarksCount,
+        bestAnswers,
+        threadsThisPeriod,
+        postsThisPeriod,
+        viewsThisPeriod,
+        likesThisPeriod
       }
     });
   } catch (error) {
-    next(error);
+    console.error('Dashboard stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch dashboard stats'
+    });
   }
 });
 
-// @route   GET /api/users/:username/threads
-// @desc    Get user's threads
-// @access  Public
-router.get('/:username/threads', async (req, res, next) => {
+// Get user's recent threads
+router.get('/dashboard/threads', protect, async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.params.username });
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
-
-    const threads = await Thread.paginate(
-      { author: user._id, isDeleted: false },
-      { page, limit, sort: '-createdAt', populate: 'category' }
-    );
+    const { limit = 10 } = req.query;
+    
+    const threads = await Thread.find({ author: req.user._id })
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .populate('category', 'name slug')
+      .populate('author', 'username avatar');
 
     res.json({
       success: true,
-      data: threads.docs,
-      pagination: {
-        total: threads.totalDocs,
-        page: threads.page,
-        pages: threads.totalPages
-      }
+      data: threads
     });
   } catch (error) {
-    next(error);
+    console.error('Get threads error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch threads'
+    });
   }
 });
 
-// @route   POST /api/users/:id/ban
-// @desc    Ban user
-// @access  Admin/Moderator
-router.post('/:id/ban', protect, async (req, res, next) => {
+// Get user's recent posts
+router.get('/dashboard/posts', protect, async (req, res) => {
   try {
-    if (req.user.role !== 'admin' && req.user.role !== 'moderator') {
-      return res.status(403).json({ success: false, message: 'Not authorized' });
-    }
-
-    const { reason } = req.body;
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { isBanned: true, banReason: reason },
-      { new: true }
-    );
-
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-
-    res.json({ success: true, message: 'User banned', data: user });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// @route   POST /api/users/:id/unban
-// @desc    Unban user
-// @access  Admin/Moderator
-router.post('/:id/unban', protect, async (req, res, next) => {
-  try {
-    if (req.user.role !== 'admin' && req.user.role !== 'moderator') {
-      return res.status(403).json({ success: false, message: 'Not authorized' });
-    }
-
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { isBanned: false, banReason: null },
-      { new: true }
-    );
-
-    res.json({ success: true, message: 'User unbanned', data: user });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// @route   PUT /api/users/:id/role
-// @desc    Change user role
-// @access  Admin only
-router.put('/:id/role', protect, adminOnly, async (req, res, next) => {
-  try {
-    const { role } = req.body;
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { role },
-      { new: true }
-    );
-
-    res.json({ success: true, message: 'Role updated', data: user });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// @route   GET /api/users/search
-// @desc    Search users
-// @access  Public
-router.get('/search', async (req, res, next) => {
-  try {
-    const q = req.query.q || '';
-
-    const users = await User.find({
-      isBanned: false,
-      $or: [
-        { username: { $regex: q, $options: 'i' } },
-        { bio: { $regex: q, $options: 'i' } }
-      ]
-    })
-      .select('username avatar role threadsCount postsCount reputation')
-      .limit(20);
+    const { limit = 10 } = req.query;
+    
+    const posts = await Post.find({ author: req.user._id })
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .populate('thread', 'title slug')
+      .populate('author', 'username avatar');
 
     res.json({
       success: true,
-      data: users
+      data: posts
     });
   } catch (error) {
-    next(error);
+    console.error('Get posts error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch posts'
+    });
   }
 });
 
-// @route   GET /api/users/profile
-// @desc    Get current user profile
-// @access  Private
-router.get('/profile', protect, async (req, res, next) => {
+// Get user's followers
+router.get('/dashboard/followers', protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id)
-      .select('-password');
-
-    res.json({
-      success: true,
-      data: user
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// @route   PUT /api/users/profile
-// @desc    Update current user profile
-// @access  Private
-router.put('/profile', protect, async (req, res, next) => {
-  try {
-    const { bio, location, website } = req.body;
-
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { bio, location, website },
-      { new: true, runValidators: true }
-    ).select('-password');
-
-    res.json({
-      success: true,
-      message: 'Profile updated',
-      data: user
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// @route   GET /api/users/bookmarks
-// @desc    Get user bookmarks
-// @access  Private
-router.get('/bookmarks', protect, async (req, res, next) => {
-  try {
+    const { limit = 10 } = req.query;
+    
     const user = await User.findById(req.user._id)
       .populate({
-        path: 'bookmarks',
-        select: 'title slug content author category repliesCount views createdAt'
+        path: 'followers',
+        options: { sort: { createdAt: -1 }, limit: parseInt(limit) },
+        select: 'username avatar'
       });
 
     res.json({
       success: true,
-      data: user.bookmarks || []
+      data: user.followers || []
     });
   } catch (error) {
-    next(error);
+    console.error('Get followers error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch followers'
+    });
+  }
+});
+
+// Get user's activity timeline
+router.get('/dashboard/activity', protect, async (req, res) => {
+  try {
+    const days = parseInt(req.query.days) || 30;
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const activities = [];
+
+    // Get threads created
+    const threads = await Thread.find({
+      author: req.user._id,
+      createdAt: { $gte: startDate }
+    }).sort({ createdAt: -1 }).limit(20);
+
+    threads.forEach(thread => {
+      activities.push({
+        type: 'thread_created',
+        description: `Created thread: ${thread.title}`,
+        createdAt: thread.createdAt,
+        thread
+      });
+    });
+
+    // Get posts created
+    const posts = await Post.find({
+      author: req.user._id,
+      createdAt: { $gte: startDate }
+    }).sort({ createdAt: -1 }).limit(20);
+
+    posts.forEach(post => {
+      activities.push({
+        type: 'post_created',
+        description: `Posted in: ${post.thread?.title || 'thread'}`,
+        createdAt: post.createdAt,
+        thread: post.thread
+      });
+    });
+
+    // Sort by date and return
+    activities.sort((a, b) => b.createdAt - a.createdAt);
+
+    res.json({
+      success: true,
+      data: activities.slice(0, 30)
+    });
+  } catch (error) {
+    console.error('Get activity error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch activity'
+    });
+  }
+});
+
+// Get user's reputation history
+router.get('/:username/reputation', protect, async (req, res) => {
+  try {
+    const { username } = req.params;
+    const { period = 'all' } = req.query;
+
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    let dateFilter = {};
+    if (period !== 'all') {
+      const startDate = new Date();
+      if (period === 'week') startDate.setDate(startDate.getDate() - 7);
+      else if (period === 'month') startDate.setMonth(startDate.getMonth() - 1);
+      else if (period === 'year') startDate.setFullYear(startDate.getFullYear() - 1);
+      dateFilter = { createdAt: { $gte: startDate } };
+    }
+
+    const reputationHistory = await Reputation.find({
+      user: user._id,
+      ...dateFilter
+    })
+      .sort({ createdAt: -1 })
+      .limit(100)
+      .populate('from', 'username avatar')
+      .populate('thread', 'title slug');
+
+    // Calculate stats
+    const stats = await Reputation.aggregate([
+      { $match: { user: user._id, ...dateFilter } },
+      {
+        $group: {
+          _id: '$type',
+          count: { $sum: 1 },
+          totalPoints: { $sum: '$points' }
+        }
+      }
+    ]);
+
+    const statsObj = {};
+    stats.forEach(s => {
+      statsObj[s._id] = { count: s.count, points: s.totalPoints };
+    });
+
+    res.json({
+      success: true,
+      data: {
+        history: reputationHistory,
+        stats: {
+          upvotesReceived: statsObj['upvote_received']?.count || 0,
+          downvotesReceived: statsObj['downvote_received']?.count || 0,
+          bestAnswers: statsObj['best_answer']?.count || 0,
+          totalLikes: (statsObj['thread_liked']?.count || 0) + (statsObj['post_liked']?.count || 0)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get reputation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch reputation history'
+    });
+  }
+});
+
+// Update user settings
+router.put('/settings', protect, async (req, res) => {
+  try {
+    const { notifications, privacy, appearance } = req.body;
+    const updateData = {};
+
+    if (notifications) {
+      updateData.notifications = notifications;
+    }
+    if (privacy) {
+      updateData.privacy = privacy;
+    }
+    if (appearance) {
+      updateData.appearance = appearance;
+    }
+
+    await User.findByIdAndUpdate(req.user._id, updateData);
+
+    res.json({
+      success: true,
+      message: 'Settings updated successfully'
+    });
+  } catch (error) {
+    console.error('Update settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update settings'
+    });
+  }
+});
+
+// Change password
+router.put('/change-password', protect, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password and new password are required'
+      });
+    }
+
+    const user = await User.findById(req.user._id).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Verify current password
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password changed successfully'
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to change password'
+    });
+  }
+});
+
+// Delete account
+router.put('/delete-account', protect, async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Soft delete - mark user as deleted
+    await User.findByIdAndUpdate(userId, {
+      isDeleted: true,
+      deletedAt: new Date(),
+      username: `deleted_${userId}`,
+      email: `deleted_${userId}@deleted.com`
+    });
+
+    // TODO: Optionally anonymize or delete user's posts/threads
+
+    res.json({
+      success: true,
+      message: 'Account deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete account error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete account'
+    });
   }
 });
 

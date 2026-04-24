@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useApi } from '../hooks/useApi';
+import { useApi } from '../hooks/useApi.js';
 import { Search, MessageSquare, Eye, Clock, User, Calendar } from 'lucide-react';
 import { formatDate } from '../utils/helpers';
 

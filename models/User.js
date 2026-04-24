@@ -88,6 +88,29 @@ const userSchema = new mongoose.Schema({
     website: String,
     twitter: String,
     github: String
+  },
+  followers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  following: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  bookmarks: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Thread'
+  }],
+  notifications: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Notification'
+  }],
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
+  deletedAt: {
+    type: Date
   }
 }, {
   timestamps: true,

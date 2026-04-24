@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useApi } from '../hooks/useApi';
+import { useApi } from '../hooks/useApi.js';
 import { Bookmark, MessageSquare, Eye, Clock, Trash2, Heart } from 'lucide-react';
 import { formatDate } from '../utils/helpers';
 

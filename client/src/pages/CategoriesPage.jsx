@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useApi } from '../hooks/useApi';
+import { useApi } from '../hooks/useApi.js';
 import { MessageSquare, Eye, Clock, TrendingUp, Pin, Lock } from 'lucide-react';
 
 const CategoriesPage = () => {

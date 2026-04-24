@@ -1,18 +1,14 @@
 const mongoose = require('mongoose');
 
 const notificationSchema = new mongoose.Schema({
-  recipient: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  sender: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
   type: {
     type: String,
-    enum: ['reply', 'mention', 'like', 'thanks', 'thread_reply', 'follow', 'system'],
+    enum: ['reply', 'mention', 'like', 'follow', 'system', 'report', 'ban'],
     required: true
   },
   title: {
@@ -23,22 +19,31 @@ const notificationSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  link: {
-    thread: { type: mongoose.Schema.Types.ObjectId, ref: 'Thread' },
-    post: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
-    url: String
+  thread: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Thread'
   },
-  isRead: {
+  post: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post'
+  },
+  from: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  read: {
     type: Boolean,
     default: false
   },
-  readAt: {
-    type: Date
-  }
+  url: String
 }, {
   timestamps: true
 });
 
-notificationSchema.index({ recipient: 1, isRead: 1, createdAt: -1 });
+// Index for faster queries
+notificationSchema.index({ user: 1, createdAt: -1 });
+notificationSchema.index({ user: 1, read: 1 });
 
-module.exports = mongoose.model('Notification', notificationSchema);
+const Notification = mongoose.model('Notification', notificationSchema);
+
+module.exports = Notification;

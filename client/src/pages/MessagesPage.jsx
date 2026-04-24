@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useApi } from '../hooks/useApi';
-import { useAuth } from '../contexts/AuthContext';
+import { useApi } from '../hooks/useApi.js';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { Send, Search, User, MessageCircle, Trash2 } from 'lucide-react';
 import { formatDate } from '../utils/helpers';
 

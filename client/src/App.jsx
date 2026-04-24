@@ -1,9 +1,9 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
+import { useAuth } from './contexts/AuthContext.jsx';
 
 // Components
-import Navbar from './components/Navbar';
+import Navbar from './components/Navbar.jsx';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -24,6 +24,8 @@ import LatestPage from './pages/LatestPage';
 import SearchPage from './pages/SearchPage';
 import EditPostPage from './pages/EditPostPage';
 import BookmarksPage from './pages/BookmarksPage';
+import UploadManager from './pages/UploadManager';
+import UserDashboard from './pages/UserDashboard';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -135,6 +137,26 @@ const App = () => {
           <Route path="/user/:username/reputation" element={
             <ProtectedRoute>
               <ReputationPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/threads" element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/posts" element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/uploads" element={
+            <ProtectedRoute>
+              <UploadManager />
             </ProtectedRoute>
           } />
 

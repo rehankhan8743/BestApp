@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useApi } from '../hooks/useApi';
-import { useAuth } from '../contexts/AuthContext';
+import { useApi } from '../hooks/useApi.js';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { Calendar, MessageSquare, Award, MapPin, Link as LinkIcon, Eye, Clock, Trophy } from 'lucide-react';
 import { formatDate, getRankColor } from '../utils/helpers';
 

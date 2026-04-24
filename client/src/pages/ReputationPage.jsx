@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useApi } from '../../hooks/useApi';
-import { useAuth } from '../../contexts/AuthContext';
+import { useApi } from '../hooks/useApi.js';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { 
   Trophy, TrendingUp, Award, Star, ArrowUp, ArrowDown, 
   Calendar, Medal, Crown, Target, Activity
 } from 'lucide-react';
-import ReputationBadge from '../../components/ReputationBadge';
+import ReputationBadge from '../components/ReputationBadge.jsx';
 
 const ReputationPage = () => {
   const { username } = useParams();

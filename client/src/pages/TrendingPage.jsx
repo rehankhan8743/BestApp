@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useApi } from '../hooks/useApi';
+import { useApi } from '../hooks/useApi.js';
 import { TrendingUp, MessageSquare, Eye, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatDate } from '../utils/helpers';

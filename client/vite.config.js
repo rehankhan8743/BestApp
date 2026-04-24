@@ -14,6 +14,19 @@ export default defineConfig({
   },
   build: {
     outDir: '../dist',
-    sourcemap: true
+    sourcemap: true,
+    emptyOutDir: true
+  },
+  resolve: {
+    extensions: ['.js', '.jsx', '.json']
+  },
+  cacheDir: '.vite-cache',
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', 'axios', 'lucide-react']
+  },
+  esbuild: {
+    supported: {
+      'top-level-await': true
+    }
   }
 })

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useApi } from '../../hooks/useApi';
+import { useApi } from '../../hooks/useApi.js';
 import {
   Users, MessageSquare, AlertTriangle, Eye, Settings, Folder, Ban, CheckCircle,
   Trash2, Edit, Search, Filter, Download, Upload, Activity, Shield, Mail,
@@ -238,8 +238,6 @@ const AdminDashboard = () => {
 
   const isAdmin = user?.role === 'admin';
   const isModerator = user?.role === 'admin' || user?.role === 'moderator';
-    }
-  };
 
   const handleBanUser = async (userId) => {
     if (!confirm('Ban this user?')) return;
