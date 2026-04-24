@@ -8,6 +8,8 @@ import { threadAPI } from '../services/api';
 const HomePage = () => {
   const { data: trendingData, loading: trendingLoading } = useApi(threadAPI.getTrending);
   const { data: latestData, loading: latestLoading } = useApi(threadAPI.getLatest);
+  const { data: categoriesData } = useApi('/api/categories');
+  const categories = categoriesData?.data || [];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -110,25 +112,43 @@ const HomePage = () => {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
             📂 Browse Categories
           </h2>
-          <div className="grid md:grid-cols-3 gap-4">
-            {[
-              { name: 'Android Applications', icon: '📱', color: 'from-blue-500 to-blue-600' },
-              { name: 'Android Games', icon: '🎮', color: 'from-red-500 to-red-600' },
-              { name: 'eBooks', icon: '📚', color: 'from-purple-500 to-purple-600' },
-              { name: 'Magazines', icon: '📰', color: 'from-orange-500 to-orange-600' },
-              { name: 'Requests', icon: '💬', color: 'from-green-500 to-green-600' },
-              { name: 'Off-Topic', icon: '☕', color: 'from-teal-500 to-teal-600' }
-            ].map((cat, index) => (
-              <Link
-                key={index}
-                to={`/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`}
-                className={`bg-gradient-to-br ${cat.color} p-6 rounded-lg text-white hover:shadow-lg transition-shadow`}
-              >
-                <span className="text-3xl mb-2 block">{cat.icon}</span>
-                <h3 className="text-lg font-semibold">{cat.name}</h3>
-              </Link>
-            ))}
-          </div>
+          {categories.length > 0 ? (
+            <div className="grid md:grid-cols-3 gap-4">
+              {categories.map((cat) => (
+                <Link
+                  key={cat._id}
+                  to={`/categories/${cat._id}`}
+                  className={`bg-gradient-to-br ${cat.color || 'from-blue-500 to-blue-600'} p-6 rounded-lg text-white hover:shadow-lg transition-shadow`}
+                >
+                  <span className="text-3xl mb-2 block">{cat.icon || '📁'}</span>
+                  <h3 className="text-lg font-semibold">{cat.name}</h3>
+                  {cat.description && (
+                    <p className="text-sm text-white/80 mt-1">{cat.description}</p>
+                  )}
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-4">
+              {[
+                { name: 'Android Applications', icon: '📱', color: 'from-blue-500 to-blue-600' },
+                { name: 'Android Games', icon: '🎮', color: 'from-red-500 to-red-600' },
+                { name: 'eBooks', icon: '📚', color: 'from-purple-500 to-purple-600' },
+                { name: 'Magazines', icon: '📰', color: 'from-orange-500 to-orange-600' },
+                { name: 'Requests', icon: '💬', color: 'from-green-500 to-green-600' },
+                { name: 'Off-Topic', icon: '☕', color: 'from-teal-500 to-teal-600' }
+              ].map((cat, index) => (
+                <Link
+                  key={index}
+                  to="/categories"
+                  className={`bg-gradient-to-br ${cat.color} p-6 rounded-lg text-white hover:shadow-lg transition-shadow`}
+                >
+                  <span className="text-3xl mb-2 block">{cat.icon}</span>
+                  <h3 className="text-lg font-semibold">{cat.name}</h3>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
