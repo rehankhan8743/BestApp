@@ -25,18 +25,21 @@ connectDB();
 const app = express();
 
 // Trust proxy for Render (behind load balancer)
-app.set('trust proxy', true);
+app.set('trust proxy', 1); // Trust first hop proxy (Render's load balancer)
 
 // Security middleware
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }
 }));
 
-// Rate limiting
+// Rate limiting - configure for proxy environment
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: { success: false, message: 'Too many requests, please try again later' }
+  message: { success: false, message: 'Too many requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: true }
 });
 app.use('/api/', limiter);
 
