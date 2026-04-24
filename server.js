@@ -65,23 +65,22 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Serve static files from React build in production
 if (process.env.NODE_ENV === 'production') {
   // Try multiple possible paths for Render compatibility
+  // Priority: root dist first (new build), then client/dist (old build)
   const possiblePaths = [
+    path.join(__dirname, 'dist'),
+    path.join(process.cwd(), 'dist'),
+    '/opt/render/project/src/dist',
     path.join(__dirname, 'client', 'dist'),
     path.join(process.cwd(), 'client', 'dist'),
-    path.join(__dirname, '..', 'client', 'dist'),
     '/opt/render/project/src/client/dist'
   ];
 
   let distPath = possiblePaths[0];
+  const fs = require('fs');
   for (const p of possiblePaths) {
-    try {
-      const fs = require('fs');
-      if (fs.existsSync(p)) {
-        distPath = p;
-        break;
-      }
-    } catch (e) {
-      // continue to next path
+    if (fs.existsSync(p)) {
+      distPath = p;
+      break;
     }
   }
 
@@ -132,9 +131,11 @@ app.use('/api/seed', seedRoutes);
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
     const possiblePaths = [
+      path.join(__dirname, 'dist', 'index.html'),
+      path.join(process.cwd(), 'dist', 'index.html'),
+      '/opt/render/project/src/dist/index.html',
       path.join(__dirname, 'client', 'dist', 'index.html'),
       path.join(process.cwd(), 'client', 'dist', 'index.html'),
-      path.join(__dirname, '..', 'client', 'dist', 'index.html'),
       '/opt/render/project/src/client/dist/index.html'
     ];
 
@@ -143,10 +144,12 @@ if (process.env.NODE_ENV === 'production') {
     for (const p of possiblePaths) {
       if (fs.existsSync(p)) {
         indexPath = p;
+        console.log(`Found index.html at: ${p}`);
         break;
       }
     }
 
+    console.log(`Serving index.html from: ${indexPath}`);
     res.sendFile(indexPath);
   });
 }

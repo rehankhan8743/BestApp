@@ -13,6 +13,9 @@
     "heroku-postbuild": "npm run build",
     "postinstall": "cd client && npm install && npm run build"
   },
+  "engines": {
+    "node": "20.x"
+  }
   "keywords": [
     "forum",
     "community",
