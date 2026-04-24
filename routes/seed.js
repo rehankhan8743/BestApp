@@ -15,7 +15,7 @@ router.post('/', async (req, res, next) => {
     const adminExists = await User.findOne({ role: 'admin' });
 
     if (adminExists) {
-      // Reset admin password if already exists
+      // Always reset admin password when seed is called
       const hashedPassword = await hashPassword('admin123');
       adminExists.password = hashedPassword;
       adminExists.isVerified = true;
