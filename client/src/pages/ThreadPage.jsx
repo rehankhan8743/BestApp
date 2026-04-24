@@ -78,6 +78,33 @@ const ThreadPage = () => {
     }
   };
 
+  const handleLike = async () => {
+    if (!thread) return;
+    try {
+      const res = await post(`/threads/${thread._id}/like`);
+      if (res?.success) {
+        setThread(prev => prev ? ({
+          ...prev,
+          likes: res.data.likes
+        }) : null);
+      }
+    } catch (error) {
+      console.error('Failed to like:', error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!thread || !confirm('Are you sure you want to delete this thread?')) return;
+    try {
+      const res = await get(`/threads/${thread._id}/delete`);
+      if (res?.success) {
+        navigate(`/category/${thread.category?.slug}`);
+      }
+    } catch (error) {
+      console.error('Failed to delete:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -127,13 +154,32 @@ const ThreadPage = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button 
+            <button
+              onClick={handleLike}
+              className={`p-2 hover:bg-secondary rounded flex items-center gap-1 ${
+                thread.likes?.includes(user?._id) ? 'text-red-500' : 'text-muted-foreground'
+              }`}
+              title="Like"
+            >
+              <Heart className="w-5 h-5" />
+              <span className="text-sm">{thread.likes?.length || 0}</span>
+            </button>
+            <button
               onClick={handleReport}
               className="p-2 hover:bg-secondary rounded"
               title="Report"
             >
               <Flag className="w-5 h-5 text-muted-foreground" />
             </button>
+            {(user?._id === thread.author?._id || user?.role === 'admin') && (
+              <button
+                onClick={handleDelete}
+                className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded text-red-500"
+                title="Delete"
+              >
+                <span className="text-sm font-medium">Delete</span>
+              </button>
+            )}
           </div>
         </div>
 

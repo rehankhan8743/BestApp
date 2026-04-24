@@ -15,6 +15,12 @@ const UserProfilePage = () => {
   const [recentPosts, setRecentPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editData, setEditData] = useState({
+    bio: '',
+    location: '',
+    website: ''
+  });
 
   useEffect(() => {
     loadProfile();
@@ -22,6 +28,7 @@ const UserProfilePage = () => {
 
   const loadProfile = async () => {
     try {
+      setLoading(true);
       const [profileRes, threadsRes, postsRes] = await Promise.all([
         get(`/users/${username}`),
         get(`/users/${username}/threads?limit=5`),
@@ -31,6 +38,11 @@ const UserProfilePage = () => {
       if (profileRes?.success) {
         setProfile(profileRes.data);
         setIsFollowing(profileRes.data.isFollowing || false);
+        setEditData({
+          bio: profileRes.data.bio || '',
+          location: profileRes.data.location || '',
+          website: profileRes.data.website || ''
+        });
       }
       if (threadsRes?.success) setRecentThreads(threadsRes.data || []);
       if (postsRes?.success) setRecentPosts(postsRes.data || []);
@@ -45,7 +57,7 @@ const UserProfilePage = () => {
     try {
       const endpoint = isFollowing ? 'unfollow' : 'follow';
       const res = await get(`/users/${username}/${endpoint}`);
-      
+
       if (res?.success) {
         setIsFollowing(!isFollowing);
         setProfile(prev => prev ? ({
@@ -55,6 +67,26 @@ const UserProfilePage = () => {
       }
     } catch (error) {
       console.error('Failed to toggle follow:', error);
+    }
+  };
+
+  const handleEditProfile = async () => {
+    try {
+      const res = await get('/users/profile/update', {
+        method: 'PUT',
+        body: editData
+      });
+
+      if (res?.success) {
+        setProfile(prev => prev ? ({
+          ...prev,
+          ...editData
+        }) : null);
+        setShowEditModal(false);
+      }
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      alert('Failed to update profile');
     }
   };
 
@@ -123,6 +155,14 @@ const UserProfilePage = () => {
                   }`}
                 >
                   {isFollowing ? 'Unfollow' : 'Follow'}
+                </button>
+              )}
+              {isOwnProfile && (
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className="px-6 py-2 bg-secondary hover:bg-primary hover:text-white rounded font-medium transition-colors"
+                >
+                  Edit Profile
                 </button>
               )}
             </div>
@@ -222,6 +262,65 @@ const UserProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-lg shadow-xl max-w-md w-full p-6">
+            <h2 className="text-2xl font-bold mb-4">Edit Profile</h2>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Bio</label>
+                <textarea
+                  value={editData.bio}
+                  onChange={(e) => setEditData({...editData, bio: e.target.value})}
+                  className="w-full p-3 bg-secondary rounded border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                  rows="3"
+                  placeholder="Tell us about yourself..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Location</label>
+                <input
+                  type="text"
+                  value={editData.location}
+                  onChange={(e) => setEditData({...editData, location: e.target.value})}
+                  className="w-full p-3 bg-secondary rounded border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Dhaka, Bangladesh"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Website</label>
+                <input
+                  type="url"
+                  value={editData.website}
+                  onChange={(e) => setEditData({...editData, website: e.target.value})}
+                  className="w-full p-3 bg-secondary rounded border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="https://yourwebsite.com"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="flex-1 px-4 py-2 bg-secondary hover:opacity-80 rounded font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditProfile}
+                className="flex-1 px-4 py-2 bg-primary text-white hover:opacity-90 rounded font-medium"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
