@@ -9,6 +9,7 @@ import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 // Placeholder pages (to be implemented)
 const CategoriesPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Categories</h1></div>;
@@ -17,7 +18,6 @@ const NewThreadPage = () => <div className="p-8"><h1 className="text-3xl font-bo
 const UserProfilePage = () => <div className="p-8"><h1 className="text-3xl font-bold">User Profile</h1></div>;
 const NotificationsPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Notifications</h1></div>;
 const MessagesPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Messages</h1></div>;
-const AdminPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Admin Panel</h1></div>;
 const TrendingPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Trending</h1></div>;
 const LatestPage = () => <div className="p-8"><h1 className="text-3xl font-bold">Latest</h1></div>;
 
@@ -96,7 +96,7 @@ const App = () => {
           {/* Admin Routes */}
           <Route path="/admin" element={
             <AdminRoute>
-              <AdminPage />
+              <AdminDashboard />
             </AdminRoute>
           } />
 

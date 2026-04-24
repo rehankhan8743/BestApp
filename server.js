@@ -92,6 +92,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // API Routes
+const adminRoutes = require('./routes/admin');
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -99,6 +100,7 @@ app.use('/api/threads', threadRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
