@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell, MessageSquare, User, LogOut, Sun, Moon, Menu, X, Search, Bookmark } from 'lucide-react';
+import { Bell, MessageSquare, User, LogOut, Sun, Moon, Menu, X, Search, Bookmark, Shield } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNotifications } from '../hooks/useNotifications';
@@ -144,11 +144,21 @@ const Navbar = () => {
                       Profile
                     </Link>
                     {isAdmin && (
-                      <Link 
+                      <Link
                         to="/admin"
                         className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
+                        <Shield className="w-4 h-4" />
                         Admin Panel
+                      </Link>
+                    )}
+                    {isModerator && !isAdmin && (
+                      <Link
+                        to="/moderator"
+                        className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <Shield className="w-4 h-4" />
+                        Moderator Panel
                       </Link>
                     )}
                     <button 
@@ -232,13 +242,35 @@ const Navbar = () => {
                 Search
               </Link>
               {user && (
-                <Link
-                  to="/bookmarks"
-                  className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Bookmarks
-                </Link>
+                <>
+                  <Link
+                    to="/bookmarks"
+                    className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Bookmarks
+                  </Link>
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Shield className="w-4 h-4" />
+                      Admin Panel
+                    </Link>
+                  )}
+                  {isModerator && !isAdmin && (
+                    <Link
+                      to="/moderator"
+                      className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Shield className="w-4 h-4" />
+                      Moderator Panel
+                    </Link>
+                  )}
+                </>
               )}
               {!user && (
                 <>

@@ -10,6 +10,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import ModeratorDashboard from './pages/ModeratorDashboard';
 import CategoriesPage from './pages/CategoriesPage';
 import ThreadPage from './pages/ThreadPage';
 import NewThreadPage from './pages/NewThreadPage';
@@ -19,6 +20,7 @@ import MessagesPage from './pages/MessagesPage';
 import TrendingPage from './pages/TrendingPage';
 import LatestPage from './pages/LatestPage';
 import SearchPage from './pages/SearchPage';
+import EditPostPage from './pages/EditPostPage';
 import BookmarksPage from './pages/BookmarksPage';
 
 // Protected Route Component
@@ -53,6 +55,25 @@ const AdminRoute = ({ children }) => {
   }
 
   if (!user || !isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+// Moderator Route Component (Admin or Moderator)
+const ModeratorRoute = ({ children }) => {
+  const { user, loading, isAdmin, isModerator } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!user || (!isAdmin && !isModerator)) {
     return <Navigate to="/" replace />;
   }
 
@@ -99,6 +120,11 @@ const App = () => {
               <BookmarksPage />
             </ProtectedRoute>
           } />
+          <Route path="/post/:postId/edit" element={
+            <ProtectedRoute>
+              <EditPostPage />
+            </ProtectedRoute>
+          } />
 
           {/* Admin Routes */}
           <Route path="/admin" element={
@@ -125,6 +151,28 @@ const App = () => {
             <AdminRoute>
               <AdminDashboard />
             </AdminRoute>
+          } />
+
+          {/* Moderator Routes */}
+          <Route path="/moderator" element={
+            <ModeratorRoute>
+              <ModeratorDashboard />
+            </ModeratorRoute>
+          } />
+          <Route path="/moderator/reports" element={
+            <ModeratorRoute>
+              <ModeratorDashboard />
+            </ModeratorRoute>
+          } />
+          <Route path="/moderator/threads" element={
+            <ModeratorRoute>
+              <ModeratorDashboard />
+            </ModeratorRoute>
+          } />
+          <Route path="/moderator/users" element={
+            <ModeratorRoute>
+              <ModeratorDashboard />
+            </ModeratorRoute>
           } />
 
           {/* 404 */}
