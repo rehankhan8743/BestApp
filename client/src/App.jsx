@@ -59,9 +59,9 @@ const AdminRoute = ({ children }) => {
 
 const App = () => {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       <Navbar />
-      <main>
+      <main className="flex-grow">
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
@@ -69,6 +69,7 @@ const App = () => {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/category/:slug" element={<CategoriesPage />} />
+          <Route path="/categories/:id" element={<CategoriesPage />} />
           <Route path="/thread/:slug" element={<ThreadPage />} />
           <Route path="/trending" element={<TrendingPage />} />
           <Route path="/latest" element={<LatestPage />} />
@@ -97,6 +98,26 @@ const App = () => {
               <AdminDashboard />
             </AdminRoute>
           } />
+          <Route path="/admin/categories" element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          } />
+          <Route path="/admin/users" element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          } />
+          <Route path="/admin/reports" element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          } />
+          <Route path="/admin/settings" element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          } />
 
           {/* 404 */}
           <Route path="*" element={
@@ -112,7 +133,7 @@ const App = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-12">
+      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center text-gray-500 dark:text-gray-400">
             <p>&copy; 2024 BestApp Forum. All rights reserved.</p>
