@@ -16,23 +16,14 @@ const router = express.Router();
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
-    const uploadDir = path.join(process.cwd(), 'uploads');
-    
+    // Use process.cwd() for Render compatibility
+    const uploadDir = path.join(process.cwd(), 'uploads', 'files');
+
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    
-    const dateDir = path.join(uploadDir, year, month, day);
-    if (!fs.existsSync(dateDir)) {
-      fs.mkdirSync(dateDir, { recursive: true });
-    }
-
-    cb(null, dateDir);
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -97,7 +88,7 @@ router.post('/', protect, upload.array('files', 10), async (req, res) => {
         mimeType: file.mimetype,
         size: file.size,
         path: file.path,
-        url: `/uploads/${file.filename}`,
+        url: `/uploads/files/${file.filename}`,
         status: 'active'
       });
       await upload.save();
