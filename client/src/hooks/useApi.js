@@ -3,6 +3,14 @@ import axios from 'axios';
 
 const API_BASE = '/api';
 
+const getHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
 export const useApi = (endpoint) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -15,13 +23,7 @@ export const useApi = (endpoint) => {
       try {
         setLoading(true);
         setError(null);
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${API_BASE}${endpoint}`, {
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-          }
-        });
+        const response = await axios.get(`${API_BASE}${endpoint}`, { headers: getHeaders() });
         setData(response.data);
       } catch (err) {
         setError(err.response?.data?.message || err.message);
@@ -34,4 +36,34 @@ export const useApi = (endpoint) => {
   }, [endpoint]);
 
   return { data, loading, error };
+};
+
+// Hook for manual API calls
+export const useApiCall = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const call = useCallback(async (method, url, data = null) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const config = {
+        method,
+        url: `${API_BASE}${url}`,
+        headers: getHeaders()
+      };
+      if (data && (method === 'post' || method === 'put')) {
+        config.data = data;
+      }
+      const response = await axios(config);
+      return response.data;
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { call, loading, error };
 };

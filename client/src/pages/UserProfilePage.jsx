@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useApi } from '../hooks/useApi.js';
+import { useApiCall } from '../hooks/useApi.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { Calendar, MessageSquare, Award, MapPin, Link as LinkIcon, Eye, Clock, Trophy } from 'lucide-react';
 import { formatDate, getRankColor } from '../utils/helpers';
 
 const UserProfilePage = () => {
   const { username } = useParams();
-  const { get, put } = useApi();
+  const { call } = useApiCall();
   const { user: currentUser } = useAuth();
   
   const [profile, setProfile] = useState(null);
@@ -31,8 +31,8 @@ const UserProfilePage = () => {
     try {
       setLoading(true);
       const [profileRes, threadsRes] = await Promise.all([
-        get(`/users/${username}`),
-        get(`/users/${username}/threads?limit=5`)
+        call('get', `/users/${username}`),
+        call('get', `/users/${username}/threads?limit=5`)
       ]);
 
       console.log('Profile response:', profileRes);
@@ -59,7 +59,7 @@ const UserProfilePage = () => {
   const handleFollow = async () => {
     try {
       const endpoint = isFollowing ? 'unfollow' : 'follow';
-      const res = await get(`/users/${username}/${endpoint}`);
+      const res = await call('get', `/users/${username}/${endpoint}`);
 
       if (res?.success) {
         setIsFollowing(!isFollowing);
@@ -75,7 +75,7 @@ const UserProfilePage = () => {
 
   const handleEditProfile = async () => {
     try {
-      const res = await put('/users/profile', editData);
+      const res = await call('put', '/users/profile', editData);
 
       if (res?.success) {
         setProfile(prev => prev ? ({
