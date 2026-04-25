@@ -7,10 +7,10 @@ const API_BASE = '/api';
 
 const getHeaders = () => {
   const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
+  const headers = {
     ...(token ? { 'Authorization': `Bearer ${token}` } : {})
   };
+  return headers;
 };
 
 export const AuthProvider = ({ children }) => {
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    const response = await axios.post(`${API_BASE}/auth/login`, { email, password }, { headers: getHeaders() });
+    const response = await axios.post(`${API_BASE}/auth/login`, { email, password }, { headers: { ...getHeaders(), 'Content-Type': 'application/json' } });
     const res = response.data;
     if (res?.success && res.data?.token) {
       localStorage.setItem('token', res.data.token);
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
-    const response = await axios.post(`${API_BASE}/auth/register`, userData, { headers: getHeaders() });
+    const response = await axios.post(`${API_BASE}/auth/register`, userData, { headers: { ...getHeaders(), 'Content-Type': 'application/json' } });
     const res = response.data;
     if (res?.success && res.data?.token) {
       localStorage.setItem('token', res.data.token);
