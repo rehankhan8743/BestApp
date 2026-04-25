@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useApi } from '../hooks/useApi.js';
+import { useApiCall } from '../hooks/useApi.js';
 import { Bookmark, MessageSquare, Eye, Clock, Trash2, Heart } from 'lucide-react';
 import { formatDate } from '../utils/helpers';
 
 const BookmarksPage = () => {
-  const { get, post } = useApi();
+  const { call } = useApiCall();
   const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,7 +15,7 @@ const BookmarksPage = () => {
 
   const loadBookmarks = async () => {
     try {
-      const res = await get('/users/bookmarks');
+      const res = await call('get', '/users/bookmarks');
       if (res?.success) {
         setBookmarks(res.data || []);
       }
@@ -28,7 +28,7 @@ const BookmarksPage = () => {
 
   const removeBookmark = async (threadId) => {
     try {
-      const res = await post(`/threads/${threadId}/bookmark`);
+      const res = await call('post', `/threads/${threadId}/bookmark`);
       if (res?.success) {
         setBookmarks(prev => prev.filter(b => b._id !== threadId));
       }

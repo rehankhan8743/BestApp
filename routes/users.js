@@ -215,6 +215,32 @@ router.get('/dashboard/activity', protect, async (req, res) => {
   }
 });
 
+// Get user's bookmarks
+router.get('/bookmarks', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .populate({
+        path: 'bookmarks',
+        select: 'title slug category views repliesCount lastActivity createdAt author',
+        populate: {
+          path: 'author',
+          select: 'username avatar role reputation'
+        }
+      });
+
+    res.json({
+      success: true,
+      data: user.bookmarks || []
+    });
+  } catch (error) {
+    console.error('Get bookmarks error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch bookmarks'
+    });
+  }
+});
+
 // Get user's reputation history
 router.get('/:username/reputation', protect, async (req, res) => {
   try {
