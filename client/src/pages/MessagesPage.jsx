@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { useApi } from '../hooks/useApi.js';
+import { useApiCall } from '../hooks/useApi.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { Send, Search, User, MessageCircle, Trash2, Plus } from 'lucide-react';
 import { formatDate } from '../utils/helpers';
 
 const MessagesPage = () => {
-  const { get, post, del, put } = useApi();
+  const { call } = useApiCall();
   const { user } = useAuth();
 
   const [conversations, setConversations] = useState([]);
@@ -44,7 +44,7 @@ const MessagesPage = () => {
 
   const loadConversations = async () => {
     try {
-      const res = await get('/messages');
+      const res = await call('get', '/messages');
       if (res?.success) {
         setConversations(res.data || []);
       }
@@ -57,7 +57,7 @@ const MessagesPage = () => {
 
   const loadMessages = async (conversationId) => {
     try {
-      const res = await get(`/messages/${conversationId}`);
+      const res = await call('get', `/messages/${conversationId}`);
       if (res?.success) {
         setMessages(res.data?.messages || []);
       }
@@ -69,7 +69,7 @@ const MessagesPage = () => {
   const startConversation = async (recipientUsername, subject, content) => {
     setSending(true);
     try {
-      const res = await post('/messages', {
+      const res = await call('post', '/messages', {
         recipientUsername,
         subject,
         content
@@ -93,7 +93,7 @@ const MessagesPage = () => {
 
     setSending(true);
     try {
-      const res = await post(`/messages/${selectedConversation._id}/reply`, {
+      const res = await call('post', `/messages/${selectedConversation._id}/reply`, {
         content: newMessage
       });
 
@@ -114,7 +114,7 @@ const MessagesPage = () => {
     if (!confirm('Delete this conversation?')) return;
 
     try {
-      const res = await del(`/messages/${id}`);
+      const res = await call('delete', `/messages/${id}`);
       if (res?.success) {
         setConversations(conversations.filter(c => c._id !== id));
         if (selectedConversation?._id === id) {
@@ -128,7 +128,7 @@ const MessagesPage = () => {
 
   const markAsRead = async (conversationId) => {
     try {
-      await put(`/messages/${conversationId}/read`);
+      await call('put', `/messages/${conversationId}/read`);
     } catch (error) {
       console.error('Failed to mark as read:', error);
     }
@@ -170,22 +170,22 @@ const MessagesPage = () => {
             <form onSubmit={async (e) => {
               e.preventDefault();
               try {
-                const convId = await startConversation(newRecipient, newSubject, newContent);
-                if (convId) {
-                  setShowNewMessageModal(false);
-                  setNewRecipient('');
-                  setNewSubject('');
-                  setNewContent('');
-                  // Load the new conversation
-                  const res = await get(`/messages/${convId}`);
-                  if (res?.success) {
-                    setSelectedConversation({
-                      _id: convId,
-                      participant: res.data.participants.find(p => p._id !== user._id)
-                    });
-                    setMessages(res.data.messages || []);
-                  }
-                }
+                 const convId = await startConversation(newRecipient, newSubject, newContent);
+                 if (convId) {
+                   setShowNewMessageModal(false);
+                   setNewRecipient('');
+                   setNewSubject('');
+                   setNewContent('');
+                   // Load the new conversation
+                   const res = await call('get', `/messages/${convId}`);
+                   if (res?.success) {
+                     setSelectedConversation({
+                       _id: convId,
+                       participant: res.data.participants.find(p => p._id !== user._id)
+                     });
+                     setMessages(res.data.messages || []);
+                   }
+                 }
               } catch (error) {
                 alert('Failed to send message: ' + (error?.response?.data?.message || 'User not found'));
               }
