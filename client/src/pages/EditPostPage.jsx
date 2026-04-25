@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useApi } from '../hooks/useApi.js';
+import { useApiCall } from '../hooks/useApi.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { Edit, Save, X, Image as ImageIcon, Trash2 } from 'lucide-react';
 
 const EditPostPage = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
-  const { put } = useApi();
+  const { call } = useApiCall();
   const { user } = useAuth();
   const [post, setPost] = useState(null);
   const [content, setContent] = useState('');
@@ -21,16 +21,10 @@ const EditPostPage = () => {
 
   const loadPost = async () => {
     try {
-      // You'll need to create this endpoint: GET /posts/:id
-      const res = await fetch(`/api/posts/${postId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await res.json();
-      if (data.success) {
-        setPost(data.data);
-        setContent(data.data.content);
+      const res = await call('get', `/posts/${postId}`);
+      if (res?.success) {
+        setPost(res.data);
+        setContent(res.data.content);
       } else {
         setError('Post not found');
       }
@@ -48,8 +42,12 @@ const EditPostPage = () => {
     }
 
     setSaving(true);
+    setError('');
     try {
-      const res = await put(`/posts/${postId}`, { content });
+      const res = await call('put', `/posts/${postId}`, {
+        content,
+        editReason: 'Updated post content'
+      });
       if (res?.success) {
         alert('Post updated successfully!');
         navigate(`/thread/${res.data.thread?.slug}#${postId}`);

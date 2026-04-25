@@ -121,6 +121,25 @@ router.put('/:id', protect, async (req, res, next) => {
   }
 });
 
+// @route   GET /api/posts/:id
+// @desc    Get single post by ID
+// @access  Private
+router.get('/:id', protect, async (req, res, next) => {
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate('author', 'username avatar reputation role')
+      .populate('thread', 'title slug');
+
+    if (!post) {
+      return res.status(404).json({ success: false, message: 'Post not found' });
+    }
+
+    res.json({ success: true, data: post });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // @route   DELETE /api/posts/:id
 // @desc    Delete post (soft delete)
 // @access  Private (Author/Admin/Mod)
