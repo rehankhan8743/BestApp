@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useApi } from '../hooks/useApi.js';
+import { useApiCall } from '../hooks/useApi.js';
 import { TrendingUp, MessageSquare, Eye, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatDate } from '../utils/helpers';
 
 const TrendingPage = () => {
-  const { get } = useApi();
+  const { call } = useApiCall();
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('day'); // day, week, month
@@ -16,7 +16,7 @@ const TrendingPage = () => {
 
   const loadTrending = async () => {
     try {
-      const res = await get(`/threads/trending?range=${timeRange}`);
+      const res = await call('get', `/threads/trending?range=${timeRange}`);
       if (res?.success) {
         setThreads(res.data || []);
       }
