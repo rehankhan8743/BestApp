@@ -19,7 +19,7 @@ const AdminDashboard = () => {
   const [threads, setThreads] = useState([]);
   const [posts, setPosts] = useState([]);
   const [activityLog, setActivityLog] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -52,8 +52,8 @@ const AdminDashboard = () => {
   }, [activeTab]);
 
   const loadDashboard = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
 
       if (activeTab === 'dashboard') {
         const [statsRes, usersRes, reportsRes, threadsRes, activityRes] = await Promise.all([
