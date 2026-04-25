@@ -1,15 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageSquare, TrendingUp, Clock, Users } from 'lucide-react';
 import ThreadList from '../components/ThreadList.jsx';
 import { useApi } from '../hooks/useApi.js';
-import { threadAPI } from '../services/api';
 
 const HomePage = () => {
-  const { data: trendingData, loading: trendingLoading } = useApi(threadAPI.getTrending);
-  const { data: latestData, loading: latestLoading } = useApi(threadAPI.getLatest);
-  const { data: categoriesData } = useApi('/api/categories');
+  const [stats, setStats] = useState({ totalUsers: 0, totalThreads: 0, totalPosts: 0, onlineUsers: 0 });
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  const { data: trendingData, loading: trendingLoading } = useApi('/threads/trending');
+  const { data: latestData, loading: latestLoading } = useApi('/threads/latest');
+  const { data: categoriesData } = useApi('/categories');
   const categories = categoriesData?.data || [];
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/stats/public/stats');
+        const result = await response.json();
+        if (result.success) {
+          setStats(result.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -44,22 +63,30 @@ const HomePage = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center">
             <Users className="w-8 h-8 mx-auto text-blue-600 mb-2" />
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">1,234</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {statsLoading ? '...' : stats.totalUsers.toLocaleString()}
+            </p>
             <p className="text-gray-500 dark:text-gray-400">Members</p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center">
             <MessageSquare className="w-8 h-8 mx-auto text-green-600 mb-2" />
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">5,678</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {statsLoading ? '...' : stats.totalThreads.toLocaleString()}
+            </p>
             <p className="text-gray-500 dark:text-gray-400">Threads</p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center">
             <TrendingUp className="w-8 h-8 mx-auto text-purple-600 mb-2" />
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">12,345</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {statsLoading ? '...' : stats.totalPosts.toLocaleString()}
+            </p>
             <p className="text-gray-500 dark:text-gray-400">Posts</p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center">
             <Clock className="w-8 h-8 mx-auto text-orange-600 mb-2" />
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">89</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {statsLoading ? '...' : stats.onlineUsers.toLocaleString()}
+            </p>
             <p className="text-gray-500 dark:text-gray-400">Online</p>
           </div>
         </div>
