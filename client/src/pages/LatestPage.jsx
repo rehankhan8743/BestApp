@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useApi } from '../hooks/useApi.js';
+import { useApiCall } from '../hooks/useApi.js';
 import { Clock, MessageSquare, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatDate } from '../utils/helpers';
 
 const LatestPage = () => {
-  const { get } = useApi();
+  const { call } = useApiCall();
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -17,7 +17,7 @@ const LatestPage = () => {
 
   const loadLatest = async () => {
     try {
-      const res = await get(`/threads/latest?page=${page}&limit=20`);
+      const res = await call('get', `/threads/latest?page=${page}&limit=20`);
       if (res?.success) {
         setThreads(prev => page === 1 ? res.data : [...prev, ...res.data]);
         setHasMore(res.data?.length === 20);
