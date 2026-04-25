@@ -390,4 +390,238 @@ router.put('/delete-account', protect, async (req, res) => {
   }
 });
 
+// Get user profile by username (public)
+router.get('/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    const user = await User.findOne({ username }).select('-password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Get counts
+    const postsCount = await Post.countDocuments({ author: user._id });
+    const threadsCount = await Thread.countDocuments({ author: user._id });
+    const followersCount = user.followers?.length || 0;
+
+    // Get recent posts
+    const recentPosts = await Post.find({ author: user._id })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate('thread', 'title slug');
+
+    // Calculate days active
+    const joinedAt = new Date(user.createdAt);
+    const now = new Date();
+    const daysActive = Math.floor((now - joinedAt) / (1000 * 60 * 60 * 24)) + 1;
+
+    // Get rank
+    const reputation = user.reputation || 0;
+    let rank = 'Newbie';
+    if (reputation >= 1000) rank = 'Legend';
+    else if (reputation >= 500) rank = 'Expert';
+    else if (reputation >= 200) rank = 'Senior';
+    else if (reputation >= 50) rank = 'Member';
+
+    // Check if requesting user is following (if authenticated)
+    let isFollowing = false;
+    if (req.user) {
+      const requestingUser = await User.findById(req.user._id);
+      isFollowing = requestingUser.following?.some(id => id.toString() === user._id.toString()) || false;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+        bio: user.bio,
+        location: user.location,
+        website: user.website,
+        socialLinks: user.socialLinks,
+        role: user.role,
+        reputation,
+        rank,
+        postsCount,
+        threadsCount,
+        followersCount,
+        followingCount: user.following?.length || 0,
+        recentPosts,
+        joinedAt: user.createdAt,
+        lastActive: user.lastActive,
+        daysActive,
+        isFollowing
+      }
+    });
+  } catch (error) {
+    console.error('Get user profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user profile'
+    });
+  }
+});
+
+// Get user's threads
+router.get('/:username/threads', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const { limit = 10 } = req.query;
+
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    const threads = await Thread.find({ author: user._id })
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .populate('category', 'name slug')
+      .populate('author', 'username avatar');
+
+    res.json({
+      success: true,
+      data: threads
+    });
+  } catch (error) {
+    console.error('Get user threads error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user threads'
+    });
+  }
+});
+
+// Follow user
+router.get('/:username/follow', protect, async (req, res) => {
+  try {
+    const { username } = req.params;
+    const userToFollow = await User.findOne({ username });
+
+    if (!userToFollow) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (userToFollow._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot follow yourself'
+      });
+    }
+
+    const currentUser = await User.findById(req.user._id);
+
+    if (!currentUser.following) currentUser.following = [];
+
+    const isAlreadyFollowing = currentUser.following.some(id => id.toString() === userToFollow._id.toString());
+    if (isAlreadyFollowing) {
+      return res.status(400).json({
+        success: false,
+        message: 'Already following this user'
+      });
+    }
+
+    currentUser.following.push(userToFollow._id);
+    await currentUser.save();
+
+    // Add follower to userToFollow
+    if (!userToFollow.followers) userToFollow.followers = [];
+    userToFollow.followers.push(req.user._id);
+    await userToFollow.save();
+
+    res.json({
+      success: true,
+      message: 'Following user successfully'
+    });
+  } catch (error) {
+    console.error('Follow user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to follow user'
+    });
+  }
+});
+
+// Unfollow user
+router.get('/:username/unfollow', protect, async (req, res) => {
+  try {
+    const { username } = req.params;
+    const userToUnfollow = await User.findOne({ username });
+
+    if (!userToUnfollow) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    const currentUser = await User.findById(req.user._id);
+
+    if (!currentUser.following) currentUser.following = [];
+
+    currentUser.following = currentUser.following.filter(id => id.toString() !== userToUnfollow._id.toString());
+    await currentUser.save();
+
+    // Remove follower from userToUnfollow
+    if (userToUnfollow.followers) {
+      userToUnfollow.followers = userToUnfollow.followers.filter(id => id.toString() !== req.user._id.toString());
+      await userToUnfollow.save();
+    }
+
+    res.json({
+      success: true,
+      message: 'Unfollowed user successfully'
+    });
+  } catch (error) {
+    console.error('Unfollow user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to unfollow user'
+    });
+  }
+});
+
+// Update user profile
+router.put('/profile', protect, async (req, res) => {
+  try {
+    const { bio, location, website, socialLinks } = req.body;
+    const updateData = {};
+
+    if (bio !== undefined) updateData.bio = bio;
+    if (location !== undefined) updateData.location = location;
+    if (website !== undefined) updateData.website = website;
+    if (socialLinks !== undefined) updateData.socialLinks = socialLinks;
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      updateData,
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: user
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update profile'
+    });
+  }
+});
+
 module.exports = router;
