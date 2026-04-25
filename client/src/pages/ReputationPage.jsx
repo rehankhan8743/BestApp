@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useApi } from '../hooks/useApi.js';
+import { useApiCall } from '../hooks/useApi.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { 
-  Trophy, TrendingUp, Award, Star, ArrowUp, ArrowDown, 
+import {
+  Trophy, TrendingUp, Award, Star, ArrowUp, ArrowDown,
   Calendar, Medal, Crown, Target, Activity
 } from 'lucide-react';
 import ReputationBadge from '../components/ReputationBadge.jsx';
 
 const ReputationPage = () => {
   const { username } = useParams();
-  const { get } = useApi();
+  const { call } = useApiCall();
   const { user: currentUser } = useAuth();
-  
+
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [reputationHistory, setReputationHistory] = useState([]);
@@ -26,15 +26,15 @@ const ReputationPage = () => {
   const loadReputation = async () => {
     try {
       setLoading(true);
-      
+
       // Load user profile
-      const profileRes = await get(`/users/${username}`);
+      const profileRes = await call('get', `/users/${username}`);
       if (profileRes?.success) {
         setUser(profileRes.data);
       }
 
       // Load reputation history
-      const historyRes = await get(`/users/${username}/reputation?period=${timeFilter}`);
+      const historyRes = await call('get', `/users/${username}/reputation?period=${timeFilter}`);
       if (historyRes?.success) {
         setReputationHistory(historyRes.data.history || []);
         setStats(historyRes.data.stats || {});
