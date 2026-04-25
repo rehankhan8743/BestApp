@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useApi } from '../hooks/useApi.js';
+import { useApiCall } from '../hooks/useApi.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { MessageSquare, Eye, Clock, Heart, Flag, MessageCircle, Pin, Lock, Bookmark } from 'lucide-react';
 import { formatDate, getRankColor } from '../utils/helpers';
 
 const ThreadPage = () => {
   const { slug } = useParams();
-  const { get, post } = useApi();
+  const { call } = useApiCall();
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -24,8 +24,8 @@ const ThreadPage = () => {
   const loadThread = async () => {
     try {
       const [threadRes, postsRes] = await Promise.all([
-        get(`/threads/${slug}`),
-        get(`/posts/thread/${slug}`)
+        call('get', `/threads/${slug}`),
+        call('get', `/posts/thread/${slug}`)
       ]);
 
       if (threadRes?.success) setThread(threadRes.data);
@@ -43,7 +43,7 @@ const ThreadPage = () => {
 
     setSubmitting(true);
     try {
-      const res = await post(`/posts`, {
+      const res = await call('post', `/posts`, {
         threadId: thread._id,
         content: newReply
       });
@@ -64,7 +64,7 @@ const ThreadPage = () => {
     if (!reason || !thread) return;
 
     try {
-      const res = await post('/reports', {
+      const res = await call('post', '/reports', {
         type: 'thread',
         contentId: thread._id,
         reason
@@ -81,7 +81,7 @@ const ThreadPage = () => {
   const handleLike = async () => {
     if (!thread) return;
     try {
-      const res = await post(`/threads/${thread._id}/like`);
+      const res = await call('post', `/threads/${thread._id}/like`);
       if (res?.success) {
         setThread(prev => prev ? ({
           ...prev,
@@ -96,7 +96,7 @@ const ThreadPage = () => {
   const handleDelete = async () => {
     if (!thread || !confirm('Are you sure you want to delete this thread?')) return;
     try {
-      const res = await get(`/threads/${thread._id}/delete`);
+      const res = await call('delete', `/threads/${thread._id}`);
       if (res?.success) {
         navigate(`/category/${thread.category?.slug}`);
       }
@@ -108,7 +108,7 @@ const ThreadPage = () => {
   const handleBookmark = async () => {
     if (!thread) return;
     try {
-      const res = await post(`/threads/${thread._id}/bookmark`);
+      const res = await call('post', `/threads/${thread._id}/bookmark`);
       if (res?.success) {
         alert(res.message);
       }
