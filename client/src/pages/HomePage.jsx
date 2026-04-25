@@ -16,7 +16,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('/api/stats/public/stats');
+        const response = await fetch('/api/stats/');
         const result = await response.json();
         if (result.success) {
           setStats(result.data);
