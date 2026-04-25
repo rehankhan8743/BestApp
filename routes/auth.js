@@ -135,13 +135,14 @@ router.put('/password', protect, async (req, res, next) => {
     const { currentPassword, newPassword } = req.body;
     const user = await User.findById(req.user._id).select('+password');
 
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    const isMatch = await verifyPassword(currentPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: 'Current password is incorrect' });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
+    const { hashPassword } = require('../utils/auth');
+    const hashedPassword = await hashPassword(newPassword);
+    user.password = hashedPassword;
     await user.save();
 
     res.json({ success: true, message: 'Password updated successfully' });
