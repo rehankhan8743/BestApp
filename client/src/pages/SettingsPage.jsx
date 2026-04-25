@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { useApi } from '../hooks/useApi.js';
+import { useApiCall } from '../hooks/useApi.js';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Lock, Mail, Bell, Shield, Eye, EyeOff, Trash2, 
-  Save, Key, Globe, Moon, Sun, AlertTriangle 
+import {
+  Lock, Mail, Bell, Shield, Eye, EyeOff, Trash2,
+  Save, Key, Globe, Moon, Sun, AlertTriangle
 } from 'lucide-react';
 
 const SettingsPage = () => {
   const { user, updateUser, logout } = useAuth();
-  const { put } = useApi();
+  const { call } = useApiCall();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('account');
   const [loading, setLoading] = useState(false);
@@ -58,7 +58,7 @@ const SettingsPage = () => {
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert('New passwords do not match!');
       return;
@@ -71,7 +71,7 @@ const SettingsPage = () => {
 
     setLoading(true);
     try {
-      const res = await put('/users/change-password', {
+      const res = await call('put', '/auth/password', {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword
       });
@@ -92,7 +92,7 @@ const SettingsPage = () => {
   const handleNotificationSave = async () => {
     setLoading(true);
     try {
-      const res = await put('/users/settings', { notifications });
+      const res = await call('put', '/users/settings', { notifications });
       if (res?.success) {
         alert('Notification settings saved!');
       }
@@ -106,7 +106,7 @@ const SettingsPage = () => {
   const handlePrivacySave = async () => {
     setLoading(true);
     try {
-      const res = await put('/users/settings', { privacy });
+      const res = await call('put', '/users/settings', { privacy });
       if (res?.success) {
         alert('Privacy settings saved!');
       }
@@ -120,7 +120,7 @@ const SettingsPage = () => {
   const handleAppearanceSave = async () => {
     setLoading(true);
     try {
-      const res = await put('/users/settings', { appearance });
+      const res = await call('put', '/users/settings', { appearance });
       if (res?.success) {
         alert('Appearance settings saved!');
         if (appearance.theme !== 'auto') {
@@ -146,7 +146,7 @@ const SettingsPage = () => {
 
     setLoading(true);
     try {
-      const res = await put('/users/delete-account');
+      const res = await call('delete', '/users/account');
       if (res?.success) {
         logout();
         navigate('/');
