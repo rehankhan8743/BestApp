@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Upload, X, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 
 const FileUploader = ({
-  endpoint = '/upload',
+  endpoint = '/api/uploads',
   maxSize = 100, // MB
   acceptedTypes = ['image/*', 'application/pdf', 'application/zip', 'application/x-rar-compressed'],
   multiple = true,

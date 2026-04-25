@@ -5,6 +5,9 @@ const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 const { protect } = require('../middleware/auth');
 const { registerValidator, loginValidator } = require('../middleware/validator');
+const { uploadAvatar } = require('../middleware/upload');
+const path = require('path');
+const fs = require('fs');
 
 // @route   POST /api/auth/register
 // @desc    Register new user
@@ -147,6 +150,42 @@ router.put('/password', protect, async (req, res, next) => {
 
     res.json({ success: true, message: 'Password updated successfully' });
   } catch (error) {
+    next(error);
+  }
+});
+
+// @route   POST /api/auth/avatar
+// @desc    Upload user avatar
+// @access  Private
+router.post('/avatar', protect, uploadAvatar.single('avatar'), async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No avatar file uploaded' });
+    }
+
+    const user = await User.findById(req.user._id);
+
+    // Delete old avatar if exists
+    if (user.avatar && fs.existsSync(user.avatar)) {
+      fs.unlink(user.avatar, () => {});
+    }
+
+    // Update user with new avatar path
+    user.avatar = req.file.path;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Avatar uploaded successfully',
+      data: {
+        avatar: `/uploads/avatars/${req.file.filename}`,
+        url: `/uploads/avatars/${req.file.filename}`
+      }
+    });
+  } catch (error) {
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlink(req.file.path, () => {});
+    }
     next(error);
   }
 });
