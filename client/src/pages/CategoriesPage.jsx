@@ -86,7 +86,7 @@ const CategoriesPage = () => {
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-primary hover:underline">
+                  <h3 className="text-xl font-semibold text-card-foreground hover:text-primary">
                     {cat.name}
                   </h3>
                   <p className="text-muted-foreground mt-1">{cat.description}</p>
@@ -118,33 +118,33 @@ const CategoriesPage = () => {
           <h2 className="text-2xl font-bold mb-4">Threads in {category.name}</h2>
           <div className="space-y-3">
             {threads.map(thread => (
-              <Link
-                key={thread._id}
-                to={`/thread/${thread.slug}`}
-                className="block bg-card rounded-lg shadow p-4 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold hover:text-primary">
-                      {thread.title}
-                    </h3>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <span>by {thread.author?.username}</span>
-                      <span className="flex items-center gap-1">
-                        <MessageSquare className="w-4 h-4" />
-                        {thread.repliesCount || 0} replies
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-4 h-4" />
-                        {thread.views || 0} views
-                      </span>
-                      <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                  {thread.isPinned && <Pin className="w-5 h-5 text-blue-500" />}
-                  {thread.isLocked && <Lock className="w-5 h-5 text-red-500" />}
-                </div>
-              </Link>
+               <Link
+                 key={thread._id}
+                 to={`/thread/${thread.slug}`}
+                 className="block bg-card rounded-lg shadow p-4 hover:shadow-md transition-shadow"
+               >
+                 <div className="flex items-start justify-between">
+                   <div className="flex-1">
+                     <h3 className="text-lg font-semibold text-card-foreground hover:text-primary">
+                       {thread.title}
+                     </h3>
+                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                       <span>by {thread.author?.username}</span>
+                       <span className="flex items-center gap-1">
+                         <MessageSquare className="w-4 h-4" />
+                         {thread.repliesCount || 0} replies
+                       </span>
+                       <span className="flex items-center gap-1">
+                         <Eye className="w-4 h-4" />
+                         {thread.views || 0} views
+                       </span>
+                       <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
+                     </div>
+                   </div>
+                   {thread.isPinned && <Pin className="w-5 h-5 text-blue-500" />}
+                   {thread.isLocked && <Lock className="w-5 h-5 text-red-500" />}
+                 </div>
+               </Link>
             ))}
           </div>
         </div>
