@@ -142,26 +142,28 @@ const HomePage = () => {
           {categories.length > 0 ? (
             <div className="grid md:grid-cols-3 gap-4">
               {categories.map((cat, index) => {
-                const defaultColors = [
-                  'from-blue-500 to-blue-600',
-                  'from-red-500 to-red-600',
-                  'from-purple-500 to-purple-600',
-                  'from-orange-500 to-orange-600',
-                  'from-green-500 to-green-600',
-                  'from-teal-500 to-teal-600'
-                ];
-                const gradientColor = cat.color || defaultColors[index % defaultColors.length];
+                const gradientColors = {
+                  'from-blue-500 to-blue-600': 'linear-gradient(135deg, #3B82F6, #2563EB)',
+                  'from-red-500 to-red-600': 'linear-gradient(135deg, #EF4444, #DC2626)',
+                  'from-purple-500 to-purple-600': 'linear-gradient(135deg, #A855F7, #9333EA)',
+                  'from-orange-500 to-orange-600': 'linear-gradient(135deg, #F97316, #EA580C)',
+                  'from-green-500 to-green-600': 'linear-gradient(135deg, #22C55E, #16A34A)',
+                  'from-teal-500 to-teal-600': 'linear-gradient(135deg, #14B8A6, #0D9488)'
+                };
+                const colorKey = cat.color || ['from-blue-500 to-blue-600', 'from-red-500 to-red-600', 'from-purple-500 to-purple-600', 'from-orange-500 to-orange-600', 'from-green-500 to-green-600', 'from-teal-500 to-teal-600'][index % 6];
+                const gradientStyle = { background: gradientColors[colorKey] };
 
                 return (
                   <Link
                     key={cat._id}
                     to={`/categories/${cat._id}`}
-                    className={`bg-gradient-to-br ${gradientColor} p-6 rounded-lg text-white hover:shadow-lg transition-shadow shadow-md`}
+                    className="p-6 rounded-lg text-white hover:shadow-lg transition-shadow shadow-md min-h-[140px]"
+                    style={gradientStyle}
                   >
                     <span className="text-3xl mb-2 block">{cat.icon || '📁'}</span>
                     <h3 className="text-lg font-semibold">{cat.name}</h3>
                     {cat.description && (
-                      <p className="text-sm text-white/90 mt-1">{cat.description}</p>
+                      <p className="text-sm text-white/95 mt-1">{cat.description}</p>
                     )}
                   </Link>
                 );
