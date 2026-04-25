@@ -1,22 +1,22 @@
 import { useState, useEffect } from 'react';
-import { useApi } from '../hooks/useApi.js';
+import { useApiCall } from '../hooks/useApi.js';
 import { Bell, Check, Trash2, ExternalLink } from 'lucide-react';
 import { formatDate } from '../utils/helpers';
 
 const NotificationsPage = () => {
-  const { get, put, del } = useApi();
+  const { call } = useApiCall();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, unread, read
 
   useEffect(() => {
     loadNotifications();
-  }, [filter]);
+  }, []);
 
   const loadNotifications = async () => {
     try {
-      const params = filter === 'unread' ? '?unread=true' : '';
-      const res = await get(`/notifications${params}`);
+      setLoading(true);
+      const res = await call('get', '/notifications');
       if (res?.success) {
         setNotifications(res.data || []);
       }
@@ -29,9 +29,9 @@ const NotificationsPage = () => {
 
   const markAsRead = async (id) => {
     try {
-      const res = await put(`/notifications/${id}/read`);
+      const res = await call('put', `/notifications/${id}/read`);
       if (res?.success) {
-        setNotifications(notifications.map(n => 
+        setNotifications(notifications.map(n =>
           n._id === id ? { ...n, isRead: true } : n
         ));
       }
@@ -42,7 +42,7 @@ const NotificationsPage = () => {
 
   const markAllAsRead = async () => {
     try {
-      const res = await put('/notifications/read-all');
+      const res = await call('put', '/notifications/read-all');
       if (res?.success) {
         setNotifications(notifications.map(n => ({ ...n, isRead: true })));
       }
@@ -53,7 +53,7 @@ const NotificationsPage = () => {
 
   const deleteNotification = async (id) => {
     try {
-      const res = await del(`/notifications/${id}`);
+      const res = await call('delete', `/notifications/${id}`);
       if (res?.success) {
         setNotifications(notifications.filter(n => n._id !== id));
       }
@@ -75,10 +75,19 @@ const NotificationsPage = () => {
         return '⚠️';
       case 'ban':
         return '🚫';
+      case 'thank':
+        return '🙏';
       default:
         return '🔔';
     }
   };
+
+  // Filter notifications
+  const filteredNotifications = filter === 'unread'
+    ? notifications.filter(n => !n.isRead)
+    : filter === 'read'
+    ? notifications.filter(n => n.isRead)
+    : notifications;
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -127,8 +136,8 @@ const NotificationsPage = () => {
       </div>
 
       <div className="space-y-2">
-        {notifications.length > 0 ? (
-          notifications.map(notification => (
+        {filteredNotifications.length > 0 ? (
+          filteredNotifications.map(notification => (
             <div
               key={notification._id}
               className={`p-4 rounded-lg border transition-colors ${
