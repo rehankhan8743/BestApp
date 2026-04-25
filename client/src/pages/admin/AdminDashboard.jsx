@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useApi } from '../../hooks/useApi.js';
+import { useApiCall } from '../../hooks/useApi.js';
+import { useAuth } from '../../contexts/AuthContext.jsx';
 import {
   Users, MessageSquare, AlertTriangle, Eye, Settings, Folder, Ban, CheckCircle,
   Trash2, Edit, Search, Filter, Download, Upload, Activity, Shield, Mail,
@@ -8,7 +9,7 @@ import {
 } from 'lucide-react';
 
 const AdminDashboard = () => {
-  const { get, put, del, post } = useApi();
+  const { call } = useApiCall();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState(null);
@@ -56,11 +57,11 @@ const AdminDashboard = () => {
 
       if (activeTab === 'dashboard') {
         const [statsRes, usersRes, reportsRes, threadsRes, activityRes] = await Promise.all([
-          get('/admin/stats'),
-          get('/admin/users?limit=10'),
-          get('/admin/reports?limit=10'),
-          get('/admin/threads?limit=5'),
-          get('/admin/activity?limit=10')
+          call('get', '/admin/stats'),
+          call('get', '/admin/users?limit=10'),
+          call('get', '/admin/reports?limit=10'),
+          call('get', '/admin/threads?limit=5'),
+          call('get', '/admin/activity?limit=10')
         ]);
         if (statsRes?.success) setStats(statsRes.data);
         if (usersRes?.success) setUsers(usersRes.data || []);
@@ -68,28 +69,28 @@ const AdminDashboard = () => {
         if (threadsRes?.success) setThreads(threadsRes.data || []);
         if (activityRes?.success) setActivityLog(activityRes.data || []);
       } else if (activeTab === 'users') {
-        const res = await get('/admin/users?limit=100');
+        const res = await call('get', '/admin/users?limit=100');
         if (res?.success) setUsers(res.data || []);
       } else if (activeTab === 'reports') {
-        const res = await get('/admin/reports?limit=50');
+        const res = await call('get', '/admin/reports?limit=50');
         if (res?.success) setReports(res.data || []);
       } else if (activeTab === 'categories') {
-        const res = await get('/categories');
+        const res = await call('get', '/categories');
         if (res?.success) setCategories(res.data || []);
       } else if (activeTab === 'threads') {
-        const res = await get('/admin/threads?limit=50');
+        const res = await call('get', '/admin/threads?limit=50');
         if (res?.success) setThreads(res.data || []);
       } else if (activeTab === 'posts') {
-        const res = await get('/admin/posts?limit=50');
+        const res = await call('get', '/admin/posts?limit=50');
         if (res?.success) setPosts(res.data || []);
       } else if (activeTab === 'settings') {
-        const res = await get('/admin/settings');
+        const res = await call('get', '/admin/settings');
         if (res?.success) setSettings(res.data || settings);
       } else if (activeTab === 'announcements') {
-        const res = await get('/admin/announcements');
+        const res = await call('get', '/admin/announcements');
         if (res?.success) setAnnouncements(res.data || []);
       } else if (activeTab === 'activity') {
-        const res = await get('/admin/activity?limit=50');
+        const res = await call('get', '/admin/activity?limit=50');
         if (res?.success) setActivityLog(res.data || []);
       }
     } catch (error) {
@@ -115,7 +116,7 @@ const AdminDashboard = () => {
   const handleBulkBan = async () => {
     if (!confirm(`Ban ${selectedUsers.length} users?`)) return;
     try {
-      const res = await post('/admin/users/bulk-ban', { userIds: selectedUsers });
+      const res = await call('post', '/admin/users/bulk-ban', { userIds: selectedUsers });
       if (res?.success) {
         alert(`${selectedUsers.length} users banned`);
         setSelectedUsers([]);
@@ -129,7 +130,7 @@ const AdminDashboard = () => {
   const handleBulkDelete = async () => {
     if (!confirm(`Delete ${selectedUsers.length} users permanently?`)) return;
     try {
-      const res = await post('/admin/users/bulk-delete', { userIds: selectedUsers });
+      const res = await call('post', '/admin/users/bulk-delete', { userIds: selectedUsers });
       if (res?.success) {
         alert(`${selectedUsers.length} users deleted`);
         setSelectedUsers([]);
@@ -142,7 +143,7 @@ const AdminDashboard = () => {
 
   const handleCreateAnnouncement = async () => {
     try {
-      const res = await post('/admin/announcements', newAnnouncement);
+      const res = await call('post', '/admin/announcements', newAnnouncement);
       if (res?.success) {
         alert('Announcement created');
         setNewAnnouncement({ title: '', content: '', priority: 'normal' });
@@ -155,7 +156,7 @@ const AdminDashboard = () => {
 
   const handlePinThread = async (threadId) => {
     try {
-      const res = await put(`/admin/threads/${threadId}/pin`);
+      const res = await call('put', `/admin/threads/${threadId}/pin`);
       if (res?.success) {
         setThreads(threads.map(t => t._id === threadId ? {...t, pinned: !t.pinned} : t));
         alert(res.message);
@@ -167,7 +168,7 @@ const AdminDashboard = () => {
 
   const handleLockThread = async (threadId) => {
     try {
-      const res = await put(`/admin/threads/${threadId}/lock`);
+      const res = await call('put', `/admin/threads/${threadId}/lock`);
       if (res?.success) {
         setThreads(threads.map(t => t._id === threadId ? {...t, locked: !t.locked} : t));
         alert(res.message);
@@ -180,7 +181,7 @@ const AdminDashboard = () => {
   const handleDeleteThread = async (threadId) => {
     if (!confirm('Delete this thread and all its posts?')) return;
     try {
-      const res = await del(`/admin/threads/${threadId}`);
+      const res = await call('delete', `/admin/threads/${threadId}`);
       if (res?.success) {
         setThreads(threads.filter(t => t._id !== threadId));
         alert('Thread deleted');
@@ -193,7 +194,7 @@ const AdminDashboard = () => {
   const handleDeletePost = async (postId) => {
     if (!confirm('Delete this post?')) return;
     try {
-      const res = await del(`/admin/posts/${postId}`);
+      const res = await call('delete', `/admin/posts/${postId}`);
       if (res?.success) {
         setPosts(posts.filter(p => p._id !== postId));
         alert('Post deleted');
@@ -205,7 +206,7 @@ const AdminDashboard = () => {
 
   const handleUpdateUserRole = async (userId, newRole) => {
     try {
-      const res = await put(`/admin/users/${userId}/role`, { role: newRole });
+      const res = await call('put', `/admin/users/${userId}/role`, { role: newRole });
       if (res?.success) {
         setUsers(users.map(u => u._id === userId ? {...u, role: newRole} : u));
         alert(`User role updated to ${newRole}`);
@@ -217,7 +218,7 @@ const AdminDashboard = () => {
 
   const handleRejectReport = async (reportId) => {
     try {
-      const res = await put(`/admin/reports/${reportId}/reject`);
+      const res = await call('put', `/admin/reports/${reportId}/reject`);
       if (res?.success) {
         setReports(reports.filter(r => r._id !== reportId));
         alert('Report rejected');
@@ -229,7 +230,7 @@ const AdminDashboard = () => {
 
   const handleSearchUsers = async () => {
     try {
-      const res = await get(`/admin/users?search=${searchQuery}&role=${roleFilter}`);
+      const res = await call('get', `/admin/users?search=${searchQuery}&role=${roleFilter}`);
       if (res?.success) setUsers(res.data || []);
     } catch (error) {
       alert('Search failed');
@@ -242,7 +243,7 @@ const AdminDashboard = () => {
   const handleBanUser = async (userId) => {
     if (!confirm('Ban this user?')) return;
     try {
-      const res = await put(`/admin/users/${userId}/ban`);
+      const res = await call('put', `/admin/users/${userId}/ban`);
       if (res?.success) {
         setUsers(users.map(u => u._id === userId ? {...u, isBanned: true} : u));
         alert('User banned');
@@ -254,7 +255,7 @@ const AdminDashboard = () => {
 
   const handleUnbanUser = async (userId) => {
     try {
-      const res = await put(`/admin/users/${userId}/unban`);
+      const res = await call('put', `/admin/users/${userId}/unban`);
       if (res?.success) {
         setUsers(users.map(u => u._id === userId ? {...u, isBanned: false} : u));
         alert('User unbanned');
@@ -267,7 +268,7 @@ const AdminDashboard = () => {
   const handleDeleteUser = async (userId) => {
     if (!confirm('Delete this user permanently? This cannot be undone.')) return;
     try {
-      const res = await del(`/admin/users/${userId}`);
+      const res = await call('delete', `/admin/users/${userId}`);
       if (res?.success) {
         setUsers(users.filter(u => u._id !== userId));
         alert('User deleted');
@@ -279,7 +280,7 @@ const AdminDashboard = () => {
 
   const handleResolveReport = async (reportId) => {
     try {
-      const res = await put(`/admin/reports/${reportId}/resolve`);
+      const res = await call('put', `/admin/reports/${reportId}/resolve`);
       if (res?.success) {
         setReports(reports.filter(r => r._id !== reportId));
         alert('Report resolved');
@@ -291,7 +292,7 @@ const AdminDashboard = () => {
 
   const handleSaveSettings = async () => {
     try {
-      const res = await put('/admin/settings', settings);
+      const res = await call('put', '/admin/settings', settings);
       if (res?.success) {
         alert('Settings saved');
       }
