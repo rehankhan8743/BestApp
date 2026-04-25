@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useApi } from '../hooks/useApi.js';
+import { useApiCall } from '../hooks/useApi.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { 
-  MessageSquare, TrendingUp, Calendar, Eye, ThumbsUp, 
+import {
+  MessageSquare, TrendingUp, Calendar, Eye, ThumbsUp,
   Award, Clock, BarChart3, Users, FileText, Bookmark
 } from 'lucide-react';
 import ReputationBadge from '../components/ReputationBadge.jsx';
 
 const UserDashboard = () => {
-  const { get } = useApi();
+  const { call } = useApiCall();
   const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
@@ -26,14 +26,14 @@ const UserDashboard = () => {
   const loadDashboard = async () => {
     try {
       setLoading(true);
-      
+
       // Load all data in parallel
       const [statsRes, threadsRes, postsRes, followersRes, activityRes] = await Promise.all([
-        get(`/users/dashboard/stats?days=${timeRange}`),
-        get(`/users/dashboard/threads?limit=5`),
-        get(`/users/dashboard/posts?limit=5`),
-        get(`/users/dashboard/followers?limit=5`),
-        get(`/users/dashboard/activity?days=${timeRange}`)
+        call('get', `/users/dashboard/stats?days=${timeRange}`),
+        call('get', `/users/dashboard/threads?limit=5`),
+        call('get', `/users/dashboard/posts?limit=5`),
+        call('get', `/users/dashboard/followers?limit=5`),
+        call('get', `/users/dashboard/activity?days=${timeRange}`)
       ]);
 
       if (statsRes?.success) setStats(statsRes.data);
