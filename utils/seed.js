@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+ const mongoose = require('mongoose');
+const { hashPassword } = require('./auth');
 const connectDB = require('./config/database');
 const User = require('./models/User');
 const Category = require('./models/Category');
@@ -13,7 +13,7 @@ const seedData = async () => {
     await Category.deleteMany({});
 
     // Create admin user
-    const adminPassword = await bcrypt.hash('admin123', 10);
+    const adminPassword = await hashPassword('admin123');
     const admin = await User.create({
       username: 'admin',
       email: 'admin@bestapp.com',

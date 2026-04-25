@@ -1,12 +1,21 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { useApi } from '../hooks/useApi.js';
+import axios from 'axios';
 
 const AuthContext = createContext(null);
+
+const API_BASE = '/api';
+
+const getHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { get, post } = useApi();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -19,7 +28,8 @@ export const AuthProvider = ({ children }) => {
 
   const loadUser = async () => {
     try {
-      const res = await get('/auth/me');
+      const response = await axios.get(`${API_BASE}/auth/me`, { headers: getHeaders() });
+      const res = response.data;
       if (res?.success) {
         setUser(res.data);
       } else {
@@ -33,23 +43,25 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    const res = await post('/auth/login', { email, password });
+    const response = await axios.post(`${API_BASE}/auth/login`, { email, password }, { headers: getHeaders() });
+    const res = response.data;
     if (res?.success && res.data?.token) {
       localStorage.setItem('token', res.data.token);
-      setUser(res.data.user);
+      setUser(res.data.user || res.data);
       return res;
     }
-    return res;
+    throw new Error(res?.message || 'Login failed');
   };
 
   const register = async (userData) => {
-    const res = await post('/auth/register', userData);
+    const response = await axios.post(`${API_BASE}/auth/register`, userData, { headers: getHeaders() });
+    const res = response.data;
     if (res?.success && res.data?.token) {
       localStorage.setItem('token', res.data.token);
-      setUser(res.data.user);
+      setUser(res.data.user || res.data);
       return res;
     }
-    return res;
+    throw new Error(res?.message || 'Registration failed');
   };
 
   const logout = () => {
