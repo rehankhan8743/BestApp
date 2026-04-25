@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useApi } from '../hooks/useApi.js';
+import { useApiCall } from '../hooks/useApi.js';
 import { Plus, X } from 'lucide-react';
 
 const NewThreadPage = () => {
   const navigate = useNavigate();
-  const { get, post } = useApi();
-  
+  const { call } = useApiCall();
+
   const [categories, setCategories] = useState([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -24,7 +24,7 @@ const NewThreadPage = () => {
 
   const loadCategories = async () => {
     try {
-      const res = await get('/categories');
+      const res = await call('get', '/categories');
       if (res?.success) {
         setCategories(res.data || []);
       }
@@ -56,7 +56,7 @@ const NewThreadPage = () => {
     setError('');
 
     try {
-      const res = await post('/threads', {
+      const res = await call('post', '/threads', {
         title,
         content,
         categoryId: selectedCategory,
