@@ -35,16 +35,18 @@ const UserProfilePage = () => {
         get(`/users/${username}/threads?limit=5`)
       ]);
 
-       if (profileRes?.success) {
-         setProfile(profileRes.data);
-         setIsFollowing(profileRes.data.isFollowing || false);
-         setEditData({
-           bio: profileRes.data.user?.bio || profileRes.data.bio || '',
-           location: profileRes.data.user?.location || profileRes.data.location || '',
-           website: profileRes.data.user?.website || profileRes.data.website || '',
-           socialLinks: profileRes.data.user?.socialLinks || profileRes.data.socialLinks || {}
-         });
-       }
+      console.log('Profile response:', profileRes);
+
+      if (profileRes?.success && profileRes?.data) {
+        setProfile(profileRes.data);
+        setIsFollowing(profileRes.data.isFollowing || false);
+        setEditData({
+          bio: profileRes.data.bio || '',
+          location: profileRes.data.location || '',
+          website: profileRes.data.website || '',
+          socialLinks: profileRes.data.socialLinks || {}
+        });
+      }
       if (threadsRes?.success) setRecentThreads(threadsRes.data || []);
       setRecentPosts(profileRes?.data?.recentPosts || []);
     } catch (error) {
