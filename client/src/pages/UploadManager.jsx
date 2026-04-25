@@ -145,8 +145,8 @@ const UploadManager = () => {
             <Upload className="w-6 h-6" />
             Upload New Files
           </h2>
-          <FileUploader 
-            endpoint="/upload"
+          <FileUploader
+            endpoint="/api/uploads"
             maxSize={100}
             acceptedTypes={['image/*', 'application/pdf', 'application/zip', 'application/x-rar-compressed']}
             multiple={true}
