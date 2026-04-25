@@ -1,19 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useApi } from '../hooks/useApi.js';
-import { Search, MessageSquare, Eye, Clock, User, Calendar } from 'lucide-react';
+import { useApiCall } from '../hooks/useApi.js';
+import { Search, MessageSquare, Eye, Clock, User, Calendar, Filter } from 'lucide-react';
 import { formatDate } from '../utils/helpers';
 
 const SearchPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { get } = useApi();
-  
+  const { call } = useApiCall();
+
   const [query, setQuery] = useState('');
   const [results, setResults] = useState({ threads: [], posts: [], users: [] });
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [activeTab, setActiveTab] = useState('threads');
+  const [filters, setFilters] = useState({
+    category: 'all',
+    sortBy: 'relevance',
+    dateRange: 'all'
+  });
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -26,13 +31,20 @@ const SearchPage = () => {
 
   const performSearch = async (searchQuery) => {
     if (!searchQuery.trim()) return;
-    
+
     setLoading(true);
     try {
+      const queryParams = new URLSearchParams({
+        q: searchQuery,
+        category: filters.category,
+        sortBy: filters.sortBy,
+        dateRange: filters.dateRange
+      });
+
       const [threadsRes, postsRes, usersRes] = await Promise.all([
-        get(`/threads/search?q=${encodeURIComponent(searchQuery)}`),
-        get(`/posts/search?q=${encodeURIComponent(searchQuery)}`),
-        get(`/users/search?q=${encodeURIComponent(searchQuery)}`)
+        call('get', `/threads/search?${queryParams.toString()}`),
+        call('get', `/posts/search?${queryParams.toString()}`),
+        call('get', `/users/search?${queryParams.toString()}`)
       ]);
 
       setResults({
@@ -76,6 +88,69 @@ const SearchPage = () => {
           </button>
         </div>
       </form>
+
+      {/* Advanced Filters */}
+      {searched && (
+        <div className="mb-6 bg-card rounded-lg p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <Filter className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold">Filters</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Category</label>
+              <select
+                value={filters.category}
+                onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+                className="w-full p-2 bg-background rounded border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="all">All Categories</option>
+                <option value="android-apps">Android Apps</option>
+                <option value="games">Games</option>
+                <option value="ebooks">eBooks</option>
+                <option value="magazines">Magazines</option>
+                <option value="requests">Requests</option>
+                <option value="off-topic">Off-Topic</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Sort By</label>
+              <select
+                value={filters.sortBy}
+                onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
+                className="w-full p-2 bg-background rounded border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="relevance">Relevance</option>
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="most-replies">Most Replies</option>
+                <option value="most-views">Most Views</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Time Range</label>
+              <select
+                value={filters.dateRange}
+                onChange={(e) => setFilters({ ...filters, dateRange: e.target.value })}
+                className="w-full p-2 bg-background rounded border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+              </select>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => performSearch(query)}
+            className="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 font-medium"
+          >
+            Apply Filters
+          </button>
+        </div>
+      )}
 
       {loading && (
         <div className="flex items-center justify-center py-12">
