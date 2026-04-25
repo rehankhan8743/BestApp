@@ -95,6 +95,8 @@ if (process.env.NODE_ENV === 'production') {
 const adminRoutes = require('./routes/admin');
 const notificationRoutes = require('./routes/notifications');
 const statsRoutes = require('./routes/stats');
+const messageRoutes = require('./routes/messages');
+const reportRoutes = require('./routes/reports');
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -105,7 +107,8 @@ app.use('/api/uploads', uploadRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/messages', notificationRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -122,12 +125,17 @@ if (process.env.NODE_ENV !== 'production') {
       endpoints: {
         health: '/api/health',
         auth: '/api/auth',
+        users: '/api/users',
         categories: '/api/categories',
         threads: '/api/threads',
         posts: '/api/posts',
-        users: '/api/users',
         search: '/api/search',
-        uploads: '/api/uploads'
+        uploads: '/api/uploads',
+        messages: '/api/messages',
+        reports: '/api/reports',
+        notifications: '/api/notifications',
+        stats: '/api/stats',
+        admin: '/api/admin'
       },
       documentation: 'https://github.com/rehankhan8743/BestApp'
     });

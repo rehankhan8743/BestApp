@@ -1,18 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
 const { verifyPassword } = require('../utils/auth');
 const User = require('../models/User');
-const jwt = require('jsonwebtoken');
+const generateToken = require('../utils/generateToken');
 const { protect } = require('../middleware/auth');
 const { registerValidator, loginValidator } = require('../middleware/validator');
-
-// Generate JWT token
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'bestappsecret2024', {
-    expiresIn: process.env.JWT_EXPIRE || '30d'
-  });
-};
 
 // @route   POST /api/auth/register
 // @desc    Register new user
