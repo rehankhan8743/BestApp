@@ -145,12 +145,12 @@ const HomePage = () => {
                 <Link
                   key={cat._id}
                   to={`/categories/${cat._id}`}
-                  className={`bg-gradient-to-br ${cat.color || 'from-blue-500 to-blue-600'} p-6 rounded-lg text-white hover:shadow-lg transition-shadow`}
+                  className={`bg-gradient-to-br ${cat.color || 'from-blue-500 to-blue-600'} p-6 rounded-lg text-white hover:shadow-lg transition-shadow shadow-md`}
                 >
                   <span className="text-3xl mb-2 block">{cat.icon || '📁'}</span>
                   <h3 className="text-lg font-semibold">{cat.name}</h3>
                   {cat.description && (
-                    <p className="text-sm text-white/80 mt-1">{cat.description}</p>
+                    <p className="text-sm text-white/90 mt-1">{cat.description}</p>
                   )}
                 </Link>
               ))}
@@ -168,7 +168,7 @@ const HomePage = () => {
                 <Link
                   key={index}
                   to="/categories"
-                  className={`bg-gradient-to-br ${cat.color} p-6 rounded-lg text-white hover:shadow-lg transition-shadow`}
+                  className={`bg-gradient-to-br ${cat.color} p-6 rounded-lg text-white hover:shadow-lg transition-shadow shadow-md`}
                 >
                   <span className="text-3xl mb-2 block">{cat.icon}</span>
                   <h3 className="text-lg font-semibold">{cat.name}</h3>
