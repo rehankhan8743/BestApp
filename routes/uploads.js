@@ -42,9 +42,12 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|gif|pdf|zip|rar|7z|doc|docx|xls|xlsx|txt|md/;
+  const allowedTypes = /jpeg|jpg|png|gif|webp|pdf|zip|rar|7z|doc|docx|xls|xlsx|txt|md|epub|apk/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
+  const mimetype = allowedTypes.test(file.mimetype) ||
+                   file.mimetype.startsWith('image/') ||
+                   file.mimetype.startsWith('application/') ||
+                   file.mimetype.startsWith('text/');
 
   if (mimetype && extname) {
     return cb(null, true);
