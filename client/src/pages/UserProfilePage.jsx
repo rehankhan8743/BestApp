@@ -19,7 +19,8 @@ const UserProfilePage = () => {
   const [editData, setEditData] = useState({
     bio: '',
     location: '',
-    website: ''
+    website: '',
+    socialLinks: {}
   });
 
   useEffect(() => {
@@ -34,15 +35,16 @@ const UserProfilePage = () => {
         get(`/users/${username}/threads?limit=5`)
       ]);
 
-      if (profileRes?.success) {
-        setProfile(profileRes.data);
-        setIsFollowing(profileRes.data.isFollowing || false);
-        setEditData({
-          bio: profileRes.data.user?.bio || profileRes.data.bio || '',
-          location: profileRes.data.user?.location || profileRes.data.location || '',
-          website: profileRes.data.user?.website || profileRes.data.website || ''
-        });
-      }
+       if (profileRes?.success) {
+         setProfile(profileRes.data);
+         setIsFollowing(profileRes.data.isFollowing || false);
+         setEditData({
+           bio: profileRes.data.user?.bio || profileRes.data.bio || '',
+           location: profileRes.data.user?.location || profileRes.data.location || '',
+           website: profileRes.data.user?.website || profileRes.data.website || '',
+           socialLinks: profileRes.data.user?.socialLinks || profileRes.data.socialLinks || {}
+         });
+       }
       if (threadsRes?.success) setRecentThreads(threadsRes.data || []);
       setRecentPosts(profileRes?.data?.recentPosts || []);
     } catch (error) {
@@ -185,7 +187,7 @@ const UserProfilePage = () => {
             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                Joined {formatDate(profile.createdAt)}
+                Member since {formatDate(profile.joinedAt || profile.createdAt)}
               </span>
               {profile.location && (
                 <span className="flex items-center gap-1">
@@ -306,6 +308,28 @@ const UserProfilePage = () => {
                   onChange={(e) => setEditData({...editData, website: e.target.value})}
                   className="w-full p-3 bg-secondary rounded border border-border focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="https://yourwebsite.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Twitter</label>
+                <input
+                  type="text"
+                  value={editData.socialLinks?.twitter || ''}
+                  onChange={(e) => setEditData({...editData, socialLinks: {...editData.socialLinks, twitter: e.target.value}})}
+                  className="w-full p-3 bg-secondary rounded border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="@yourusername"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">GitHub</label>
+                <input
+                  type="text"
+                  value={editData.socialLinks?.github || ''}
+                  onChange={(e) => setEditData({...editData, socialLinks: {...editData.socialLinks, github: e.target.value}})}
+                  className="w-full p-3 bg-secondary rounded border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="yourusername"
                 />
               </div>
             </div>
