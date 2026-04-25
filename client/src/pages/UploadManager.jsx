@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useApi } from '../hooks/useApi.js';
+import { useApiCall } from '../hooks/useApi.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import FileUploader from '../components/FileUploader.jsx';
-import { 
-  Upload, File, Image, Trash2, Download, Eye, 
-  HardDrive, AlertCircle, CheckCircle, Clock 
+import {
+  Upload, File, Image, Trash2, Download, Eye,
+  HardDrive, AlertCircle, CheckCircle, Clock
 } from 'lucide-react';
 
 const UploadManager = () => {
-  const { get, del } = useApi();
+  const { call } = useApiCall();
   const { user } = useAuth();
   const [uploads, setUploads] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +25,7 @@ const UploadManager = () => {
   const loadUploads = async () => {
     try {
       setLoading(true);
-      const res = await get(`/uploads?filter=${filter}&sort=${sortBy}`);
+      const res = await call('get', `/uploads?filter=${filter}&sort=${sortBy}`);
       if (res?.success) {
         setUploads(res.data.uploads || []);
         setStorageUsed(res.data.storageUsed || 0);
@@ -40,10 +40,10 @@ const UploadManager = () => {
 
   const handleDelete = async (uploadId) => {
     if (!confirm('Are you sure you want to delete this file?')) return;
-    
+
     setDeleting(uploadId);
     try {
-      const res = await del(`/uploads/${uploadId}`);
+      const res = await call('delete', `/uploads/${uploadId}`);
       if (res?.success) {
         setUploads(uploads.filter(u => u._id !== uploadId));
         alert('File deleted successfully');
