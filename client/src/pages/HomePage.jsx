@@ -141,19 +141,31 @@ const HomePage = () => {
           </h2>
           {categories.length > 0 ? (
             <div className="grid md:grid-cols-3 gap-4">
-              {categories.map((cat) => (
-                <Link
-                  key={cat._id}
-                  to={`/categories/${cat._id}`}
-                  className={`bg-gradient-to-br ${cat.color || 'from-blue-500 to-blue-600'} p-6 rounded-lg text-white hover:shadow-lg transition-shadow shadow-md`}
-                >
-                  <span className="text-3xl mb-2 block">{cat.icon || '📁'}</span>
-                  <h3 className="text-lg font-semibold">{cat.name}</h3>
-                  {cat.description && (
-                    <p className="text-sm text-white/90 mt-1">{cat.description}</p>
-                  )}
-                </Link>
-              ))}
+              {categories.map((cat, index) => {
+                const defaultColors = [
+                  'from-blue-500 to-blue-600',
+                  'from-red-500 to-red-600',
+                  'from-purple-500 to-purple-600',
+                  'from-orange-500 to-orange-600',
+                  'from-green-500 to-green-600',
+                  'from-teal-500 to-teal-600'
+                ];
+                const gradientColor = cat.color || defaultColors[index % defaultColors.length];
+
+                return (
+                  <Link
+                    key={cat._id}
+                    to={`/categories/${cat._id}`}
+                    className={`bg-gradient-to-br ${gradientColor} p-6 rounded-lg text-white hover:shadow-lg transition-shadow shadow-md`}
+                  >
+                    <span className="text-3xl mb-2 block">{cat.icon || '📁'}</span>
+                    <h3 className="text-lg font-semibold">{cat.name}</h3>
+                    {cat.description && (
+                      <p className="text-sm text-white/90 mt-1">{cat.description}</p>
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           ) : (
             <div className="grid md:grid-cols-3 gap-4">
