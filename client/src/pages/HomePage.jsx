@@ -142,15 +142,20 @@ const HomePage = () => {
           {categories.length > 0 ? (
             <div className="grid md:grid-cols-3 gap-4">
               {categories.map((cat, index) => {
-                const gradients = [
-                  'bg-gradient-to-br from-blue-500 to-blue-600',
-                  'bg-gradient-to-br from-red-500 to-red-600',
-                  'bg-gradient-to-br from-purple-500 to-purple-600',
-                  'bg-gradient-to-br from-orange-500 to-orange-600',
-                  'bg-gradient-to-br from-green-500 to-green-600',
-                  'bg-gradient-to-br from-teal-500 to-teal-600'
-                ];
-                const gradientClass = cat.color ? `bg-gradient-to-br ${cat.color}` : gradients[index % gradients.length];
+                // Explicit gradient classes - must be complete class names for Tailwind to detect
+                let gradientClass = '';
+                if (cat.color && cat.color.includes('from-') && cat.color.includes('to-')) {
+                  gradientClass = `bg-gradient-to-br ${cat.color}`;
+                } else {
+                  // Assign by index with hardcoded complete class names
+                  const idx = index % 6;
+                  if (idx === 0) gradientClass = 'bg-gradient-to-br from-blue-500 to-blue-600';
+                  else if (idx === 1) gradientClass = 'bg-gradient-to-br from-red-500 to-red-600';
+                  else if (idx === 2) gradientClass = 'bg-gradient-to-br from-purple-500 to-purple-600';
+                  else if (idx === 3) gradientClass = 'bg-gradient-to-br from-orange-500 to-orange-600';
+                  else if (idx === 4) gradientClass = 'bg-gradient-to-br from-green-500 to-green-600';
+                  else gradientClass = 'bg-gradient-to-br from-teal-500 to-teal-600';
+                }
 
                 return (
                   <Link
