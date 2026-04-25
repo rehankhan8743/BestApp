@@ -1,91 +1,37 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const API_BASE = '/api';
 
-export const useApi = () => {
-  const [loading, setLoading] = useState(false);
+export const useApi = (endpoint) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const getHeaders = () => {
-    const token = localStorage.getItem('token');
-    return {
-      'Content-Type': 'application/json',
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  useEffect(() => {
+    if (!endpoint) return;
+
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${API_BASE}${endpoint}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
+        });
+        setData(response.data);
+      } catch (err) {
+        setError(err.response?.data?.message || err.message);
+      } finally {
+        setLoading(false);
+      }
     };
-  };
 
-  const get = useCallback(async (url, params = {}) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await axios.get(`${API_BASE}${url}`, {
-        headers: getHeaders(),
-        params
-      });
-      return response.data;
-    } catch (err) {
-      setError(err.response?.data?.message || err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    fetchData();
+  }, [endpoint]);
 
-  const post = useCallback(async (url, data = {}) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await axios.post(`${API_BASE}${url}`, data, {
-        headers: getHeaders()
-      });
-      return response.data;
-    } catch (err) {
-      setError(err.response?.data?.message || err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const put = useCallback(async (url, data = {}) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await axios.put(`${API_BASE}${url}`, data, {
-        headers: getHeaders()
-      });
-      return response.data;
-    } catch (err) {
-      setError(err.response?.data?.message || err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const del = useCallback(async (url) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await axios.delete(`${API_BASE}${url}`, {
-        headers: getHeaders()
-      });
-      return response.data;
-    } catch (err) {
-      setError(err.response?.data?.message || err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  return {
-    get,
-    post,
-    put,
-    del,
-    loading,
-    error
-  };
+  return { data, loading, error };
 };
