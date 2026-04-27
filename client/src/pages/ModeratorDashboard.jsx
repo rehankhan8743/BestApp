@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useApi } from '../hooks/useApi.js';
+import { useApiCall } from '../hooks/useApi.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import {
   AlertTriangle, CheckCircle, Clock, Activity, MessageSquare,
@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 
 const ModeratorDashboard = () => {
-  const { get, put, del, post } = useApi();
+  const { call } = useApiCall();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('reports');
   const [reports, setReports] = useState([]);
@@ -51,7 +51,7 @@ const ModeratorDashboard = () => {
   const handleResolveReport = async (reportId, action) => {
     if (!confirm(`${action} this report?`)) return;
     try {
-      const res = await put(`/admin/reports/${reportId}`, { status: action === 'approve' ? 'resolved' : 'rejected' });
+      const res = await call('put', `/admin/reports/${reportId}`, { status: action === 'approve' ? 'resolved' : 'rejected' });
       if (res?.success) {
         setReports(reports.filter(r => r._id !== reportId));
         alert(`Report ${action === 'approve' ? 'resolved' : 'rejected'}`);
@@ -64,7 +64,7 @@ const ModeratorDashboard = () => {
   const handleBanUser = async (userId, username) => {
     if (!confirm(`Ban user ${username}?`)) return;
     try {
-      const res = await put(`/admin/users/${userId}/ban`, { reason: 'Moderator action' });
+      const res = await call('put', `/admin/users/${userId}/ban`, { reason: 'Moderator action' });
       if (res?.success) {
         setUsers(users.map(u => u._id === userId ? {...u, isBanned: true} : u));
         alert('User banned');
@@ -77,7 +77,7 @@ const ModeratorDashboard = () => {
   const handleUnbanUser = async (userId, username) => {
     if (!confirm(`Unban user ${username}?`)) return;
     try {
-      const res = await put(`/admin/users/${userId}/unban`);
+      const res = await call('put', `/admin/users/${userId}/unban`);
       if (res?.success) {
         setUsers(users.map(u => u._id === userId ? {...u, isBanned: false} : u));
         alert('User unbanned');
@@ -89,7 +89,7 @@ const ModeratorDashboard = () => {
 
   const handlePinThread = async (threadId) => {
     try {
-      const res = await put(`/admin/threads/${threadId}/pin`);
+      const res = await call('put', `/admin/threads/${threadId}/pin`);
       if (res?.success) {
         setThreads(threads.map(t => t._id === threadId ? {...t, pinned: !t.pinned} : t));
         alert(res.message);
@@ -101,7 +101,7 @@ const ModeratorDashboard = () => {
 
   const handleLockThread = async (threadId) => {
     try {
-      const res = await put(`/admin/threads/${threadId}/lock`);
+      const res = await call('put', `/admin/threads/${threadId}/lock`);
       if (res?.success) {
         setThreads(threads.map(t => t._id === threadId ? {...t, locked: !t.locked} : t));
         alert(res.message);
@@ -114,7 +114,7 @@ const ModeratorDashboard = () => {
   const handleDeleteThread = async (threadId) => {
     if (!confirm('Delete this thread and all its posts?')) return;
     try {
-      const res = await del(`/admin/threads/${threadId}`);
+      const res = await call('delete', `/admin/threads/${threadId}`);
       if (res?.success) {
         setThreads(threads.filter(t => t._id !== threadId));
         alert('Thread deleted');
@@ -127,7 +127,7 @@ const ModeratorDashboard = () => {
   const handleDeletePost = async (postId) => {
     if (!confirm('Delete this post?')) return;
     try {
-      const res = await del(`/admin/posts/${postId}`);
+      const res = await call('delete', `/admin/posts/${postId}`);
       if (res?.success) {
         alert('Post deleted');
         loadDashboard();
