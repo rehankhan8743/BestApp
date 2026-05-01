@@ -19,23 +19,19 @@ const CategoriesPage = () => {
     try {
       setLoading(true);
       const res = await get('/categories');
-      console.log('Categories API Response:', res);
       if (res?.success) {
         let data = res.data;
-        console.log('Categories data:', data);
 
         if (slug) {
           const found = data.find(c => c.slug === slug || c._id === slug);
-          console.log('Found category:', found);
           if (found) {
             setCategory(found);
             // Load threads for this category
             const threadsRes = await get(`/threads?category=${found._id}&limit=50`);
-            console.log('Threads API Response:', threadsRes);
             if (threadsRes?.success) {
               setThreads(threadsRes.data || []);
             }
-            // If has subcategories, show them instead
+            // Show subcategories if available, but also show threads
             if (found.subcategories?.length > 0) {
               data = found.subcategories;
             } else {
@@ -98,11 +94,11 @@ const CategoriesPage = () => {
                   <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <MessageSquare className="w-4 h-4" />
-                      {cat.threadCount || 0} threads
+                      {cat.threadsCount || cat.threadCount || 0} threads
                     </span>
                     <span className="flex items-center gap-1">
                       <Eye className="w-4 h-4" />
-                      {cat.postCount || 0} posts
+                      {cat.postsCount || cat.postCount || 0} posts
                     </span>
                   </div>
                 </div>
@@ -151,6 +147,13 @@ const CategoriesPage = () => {
                </Link>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Show subcategories first, then threads below */}
+      {category && categories.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Subcategories</h2>
         </div>
       )}
 
