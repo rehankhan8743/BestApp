@@ -19,15 +19,19 @@ const CategoriesPage = () => {
     try {
       setLoading(true);
       const res = await get('/categories');
+      console.log('Categories API Response:', res);
       if (res?.success) {
         let data = res.data;
+        console.log('Categories data:', data);
 
         if (slug) {
           const found = data.find(c => c.slug === slug || c._id === slug);
+          console.log('Found category:', found);
           if (found) {
             setCategory(found);
             // Load threads for this category
             const threadsRes = await get(`/threads?category=${found._id}&limit=50`);
+            console.log('Threads API Response:', threadsRes);
             if (threadsRes?.success) {
               setThreads(threadsRes.data || []);
             }
