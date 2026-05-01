@@ -153,7 +153,40 @@ const CategoriesPage = () => {
       {/* Show subcategories first, then threads below */}
       {category && categories.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Subcategories</h2>
+          <h2 className="text-2xl font-bold mb-4">Subcategories in {category.name}</h2>
+          <div className="space-y-4">
+            {categories.map(cat => (
+              <div
+                key={cat._id}
+                className="bg-card rounded-lg shadow p-6 hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => window.location.href = `/category/${cat.slug}`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-semibold text-card-foreground hover:text-primary">
+                      {cat.name}
+                    </h3>
+                    <p className="text-muted-foreground mt-1">{cat.description}</p>
+
+                    <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <MessageSquare className="w-4 h-4" />
+                        {cat.threadsCount || cat.threadCount || 0} threads
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Eye className="w-4 h-4" />
+                        {cat.postsCount || cat.postCount || 0} posts
+                      </span>
+                    </div>
+                  </div>
+
+                  {cat.icon && (
+                    <div className="text-4xl ml-4">{cat.icon}</div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
